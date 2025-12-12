@@ -281,7 +281,15 @@ async function handleLogin(e) {
         if (result.success) {
             setAuth(result.token, result.user);
             showMessage('Login successful!', 'success');
-            setTimeout(updateUI, 500);
+            setTimeout(() => {
+                const redirect = sessionStorage.getItem('codevision_redirect');
+                if (redirect) {
+                    sessionStorage.removeItem('codevision_redirect');
+                    window.location.href = redirect;
+                } else {
+                    updateUI();
+                }
+            }, 500);
         } else {
             showMessage(result.error || 'Login failed', 'error');
         }
@@ -318,7 +326,15 @@ async function handleRegister(e) {
         if (result.success) {
             setAuth(result.token, result.user);
             showMessage('Account created successfully!', 'success');
-            setTimeout(updateUI, 500);
+            setTimeout(() => {
+                const redirect = sessionStorage.getItem('codevision_redirect');
+                if (redirect) {
+                    sessionStorage.removeItem('codevision_redirect');
+                    window.location.href = redirect;
+                } else {
+                    updateUI();
+                }
+            }, 500);
         } else {
             showMessage(result.error || 'Registration failed', 'error');
         }
