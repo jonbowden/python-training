@@ -1,0 +1,5 @@
+/* Reduce intro page logo to 50% */
+.bd-article-container img[alt="CodeVision Logo"] {
+    max-width: 150px;
+    height: auto;
+}
