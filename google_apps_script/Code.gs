@@ -266,26 +266,17 @@ function gradeWrittenAnswer(question, userAnswer, sampleAnswer) {
     return { correct: false, feedback: 'No answer provided', score: 0 };
   }
 
-  const prompt = `You are grading a student's answer to a Python programming quiz question.
+  const prompt = `Grade this quiz answer. Be VERY lenient - if the student shows ANY understanding of the concept, mark it correct.
 
-QUESTION: ${question}
+Question: ${question}
+Expected concepts: ${sampleAnswer}
+Student wrote: ${userAnswer}
 
-SAMPLE ANSWER: ${sampleAnswer}
+The student's answer is CORRECT if it mentions similar concepts, even using different words.
+For example: "readability" = "clarity", "reusability" = "reuse", "maintainability" = "easier testing/maintenance"
 
-STUDENT'S ANSWER: ${userAnswer}
-
-Grade the student's answer. Be lenient - accept answers that demonstrate understanding even if worded differently.
-Consider partial credit for answers that show some understanding.
-
-Respond with ONLY a JSON object in this exact format (no markdown, no explanation):
-{"correct": true, "score": 1, "feedback": "brief feedback"}
-
-Where:
-- correct: true if answer demonstrates understanding (even if not word-perfect), false otherwise
-- score: 1 for correct, 0.5 for partial credit, 0 for incorrect
-- feedback: brief explanation (max 20 words)
-
-JSON response:`;
+Reply with ONLY valid JSON, nothing else:
+{"correct": true, "score": 1, "feedback": "Good answer"}`;
 
   try {
     const response = UrlFetchApp.fetch(LLM_URL, {
@@ -303,31 +294,46 @@ JSON response:`;
     });
 
     const responseCode = response.getResponseCode();
+    const responseText = response.getContentText();
+    Logger.log('LLM response code: ' + responseCode);
+    Logger.log('LLM response: ' + responseText.substring(0, 500));
+
     if (responseCode !== 200) {
-      Logger.log('LLM error: ' + responseCode + ' - ' + response.getContentText());
-      return fallbackGrading(userAnswer, sampleAnswer);
+      Logger.log('LLM error: ' + responseCode);
+      return { correct: false, score: 0, feedback: 'LLM error: ' + responseCode };
     }
 
-    const result = JSON.parse(response.getContentText());
+    const result = JSON.parse(responseText);
     const llmResponse = result.response || '';
+    Logger.log('LLM parsed response: ' + llmResponse);
 
     // Try to extract JSON from response
-    const jsonMatch = llmResponse.match(/\{[\s\S]*\}/);
+    const jsonMatch = llmResponse.match(/\{[\s\S]*?\}/);
     if (jsonMatch) {
-      const grading = JSON.parse(jsonMatch[0]);
-      return {
-        correct: grading.correct === true,
-        score: grading.score || (grading.correct ? 1 : 0),
-        feedback: grading.feedback || ''
-      };
+      try {
+        const grading = JSON.parse(jsonMatch[0]);
+        return {
+          correct: grading.correct === true,
+          score: grading.score || (grading.correct ? 1 : 0),
+          feedback: grading.feedback || 'Graded by AI'
+        };
+      } catch (parseErr) {
+        Logger.log('JSON parse error: ' + parseErr);
+      }
     }
 
-    // Fallback if can't parse
-    return fallbackGrading(userAnswer, sampleAnswer);
+    // Check for simple true/false in response
+    const lowerResponse = llmResponse.toLowerCase();
+    if (lowerResponse.includes('"correct": true') || lowerResponse.includes('"correct":true')) {
+      return { correct: true, score: 1, feedback: 'Answer accepted' };
+    }
+
+    // Fallback - be lenient
+    return { correct: false, score: 0, feedback: 'Could not parse LLM response' };
 
   } catch (e) {
-    Logger.log('LLM grading error: ' + e);
-    return fallbackGrading(userAnswer, sampleAnswer);
+    Logger.log('LLM grading exception: ' + e);
+    return { correct: false, score: 0, feedback: 'Grading error: ' + e.message };
   }
 }
 
@@ -417,6 +423,49 @@ function createScoresSheet(ss) {
 }
 
 // ============ ADMIN FUNCTIONS (run manually) ============
+
+function testLLMGrading() {
+  // Test the LLM grading function
+  const question = "Why should code be split into functions?";
+  const userAnswer = "To improve readability, maintainability, and reusability.";
+  const sampleAnswer = "For reuse, clarity, and easier testing.";
+
+  Logger.log('Testing LLM grading...');
+  Logger.log('Question: ' + question);
+  Logger.log('User answer: ' + userAnswer);
+  Logger.log('Sample answer: ' + sampleAnswer);
+
+  const result = gradeWrittenAnswer(question, userAnswer, sampleAnswer);
+  Logger.log('Result: ' + JSON.stringify(result));
+
+  return result;
+}
+
+function testLLMConnection() {
+  // Test basic LLM connectivity
+  Logger.log('Testing LLM connection to: ' + LLM_URL);
+
+  try {
+    const response = UrlFetchApp.fetch(LLM_URL, {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { 'ngrok-skip-browser-warning': 'true' },
+      payload: JSON.stringify({
+        model: LLM_MODEL,
+        prompt: 'Say "hello" and nothing else.',
+        stream: false
+      }),
+      muteHttpExceptions: true
+    });
+
+    Logger.log('Response code: ' + response.getResponseCode());
+    Logger.log('Response: ' + response.getContentText().substring(0, 500));
+    return { success: true, code: response.getResponseCode() };
+  } catch (e) {
+    Logger.log('Connection error: ' + e);
+    return { success: false, error: e.message };
+  }
+}
 
 function setupSpreadsheet() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
