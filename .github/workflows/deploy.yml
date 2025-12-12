@@ -21,15 +21,17 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
-        run: |
-          pip install "jupyter-book<2"
+      - name: Install Jupyter Book 1.x
+        run: pip install 'jupyter-book<2'
+
+      - name: Verify version
+        run: jupyter-book --version
 
       - name: Build the book
-        run: |
-          jupyter-book build . --verbose
-          ls -la _build/
-          ls -la _build/html/ || echo "html folder not found"
+        run: jupyter-book build .
+
+      - name: List build output
+        run: ls -la _build/html/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
