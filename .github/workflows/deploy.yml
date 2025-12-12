@@ -27,7 +27,9 @@ jobs:
 
       - name: Build the book
         run: |
-          jupyter-book build .
+          jupyter-book build . --verbose
+          ls -la _build/
+          ls -la _build/html/ || echo "html folder not found"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
