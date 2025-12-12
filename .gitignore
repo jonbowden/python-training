@@ -6,3 +6,6 @@ __pycache__/
 .claude/
 myst.yml
 ._*.bak
+python-training/
+repo_token.txt
+*.gs.txt

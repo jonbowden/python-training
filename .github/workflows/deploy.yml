@@ -22,7 +22,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install Jupyter Book 1.x
-        run: pip install 'jupyter-book<2'
+        run: pip install 'jupyter-book<2' jupyterquiz
 
       - name: Verify version
         run: jupyter-book --version
