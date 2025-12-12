@@ -1,6 +1,8 @@
 format: jb-book
 root: intro
 chapters:
+- file: login
+- file: dashboard
 - file: 01_syntax
 - file: 01_quiz
 - file: 01_resources

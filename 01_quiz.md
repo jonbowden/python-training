@@ -19,9 +19,15 @@ Test your understanding of Python fundamentals. Click the button below to start 
 .score-display { font-size: 24px; font-weight: bold; text-align: center; padding: 20px; background: #e8f4fc; border-radius: 8px; margin: 20px 0; }
 .hidden { display: none; }
 .sample-answer { background: #fff3cd; padding: 10px; margin-top: 10px; border-radius: 4px; border: 1px solid #ffc107; }
+.auth-notice { background: #e0f2fe; border: 1px solid #0284c7; padding: 15px; border-radius: 5px; margin-bottom: 15px; }
+.auth-notice a { color: #0066cc; font-weight: bold; }
+.score-saved { background: #d1fae5; padding: 10px; margin-top: 10px; border-radius: 5px; text-align: center; color: #059669; }
+.score-not-saved { background: #fef3c7; padding: 10px; margin-top: 10px; border-radius: 5px; text-align: center; color: #92400e; }
+.user-greeting { background: #f0fdf4; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #86efac; }
 </style>
 
 <div class="quiz-container">
+  <div id="auth-status"></div>
   <div id="quiz-intro">
     <p><strong>This quiz contains:</strong></p>
     <ul>
@@ -36,12 +42,65 @@ Test your understanding of Python fundamentals. Click the button below to start 
 
   <div id="quiz-results" class="hidden">
     <div class="score-display" id="score-text"></div>
+    <div id="save-status"></div>
     <div id="review-area"></div>
     <button class="retry-btn" onclick="startQuiz()">Try Again (New Questions)</button>
   </div>
 </div>
 
 <script>
+// ============ CONFIGURATION ============
+const API_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+const QUIZ_ID = 'module1-quiz';
+const AUTH_KEY = 'codevision_auth';
+
+function getAuth() {
+    try {
+        const auth = localStorage.getItem(AUTH_KEY);
+        return auth ? JSON.parse(auth) : null;
+    } catch {
+        return null;
+    }
+}
+
+function updateAuthStatus() {
+    const auth = getAuth();
+    const statusDiv = document.getElementById('auth-status');
+    if (auth && auth.user) {
+        statusDiv.innerHTML = `<div class="user-greeting">Logged in as <strong>${auth.user.name}</strong> - Your score will be saved to your transcript.</div>`;
+    } else {
+        statusDiv.innerHTML = `<div class="auth-notice"><a href="login.html">Login or Register</a> to save your quiz scores to your transcript.</div>`;
+    }
+}
+
+async function saveScore(score, maxScore, answers) {
+    const auth = getAuth();
+    if (!auth || !auth.token) {
+        return { saved: false, reason: 'not_logged_in' };
+    }
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'submitScore',
+                token: auth.token,
+                quizId: QUIZ_ID,
+                score: score,
+                maxScore: maxScore,
+                answers: answers
+            })
+        });
+        const result = await response.json();
+        return { saved: result.success, reason: result.error || 'saved' };
+    } catch (err) {
+        return { saved: false, reason: 'connection_error' };
+    }
+}
+
+document.addEventListener('DOMContentLoaded', updateAuthStatus);
+
 const mcqPool = [
   {
     q: "Which of the following best explains why Python uses indentation?",
@@ -348,7 +407,7 @@ function startQuiz() {
   document.getElementById('quiz-area').innerHTML = html;
 }
 
-function submitQuiz() {
+async function submitQuiz() {
   let score = 0;
   let reviewHtml = '<h3>Review Your Answers:</h3>';
   let qNum = 1;
@@ -408,6 +467,21 @@ function submitQuiz() {
   document.getElementById('quiz-results').classList.remove('hidden');
   document.getElementById('score-text').innerHTML = `Your Score: ${score}/5`;
   document.getElementById('review-area').innerHTML = reviewHtml;
+
+  // Save score if logged in
+  const saveStatusDiv = document.getElementById('save-status');
+  const auth = getAuth();
+  if (auth && auth.token) {
+    saveStatusDiv.innerHTML = '<div class="score-not-saved">Saving score...</div>';
+    const result = await saveScore(score, 5, userAnswers);
+    if (result.saved) {
+      saveStatusDiv.innerHTML = '<div class="score-saved">✓ Score saved to your transcript! <a href="dashboard.html">View Progress</a></div>';
+    } else {
+      saveStatusDiv.innerHTML = `<div class="score-not-saved">Could not save score: ${result.reason}</div>`;
+    }
+  } else {
+    saveStatusDiv.innerHTML = '<div class="score-not-saved"><a href="login.html">Login</a> to save your scores to your transcript.</div>';
+  }
 }
 </script>
 ```
