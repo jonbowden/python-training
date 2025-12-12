@@ -108,23 +108,33 @@ const mcqPool = [
 const writtenPool = [
   {
     q: "Write a line of Python that assigns 42 to a variable called 'answer'.",
-    sample: "answer = 42"
+    sample: "answer = 42",
+    keywords: ["answer", "=", "42"],
+    minMatches: 3
   },
   {
     q: "What is the difference between a list and a tuple?",
-    sample: "A list is mutable (can be changed); a tuple is immutable (cannot be changed after creation)."
+    sample: "A list is mutable (can be changed); a tuple is immutable (cannot be changed after creation).",
+    keywords: ["list", "mutable", "tuple", "immutable", "change"],
+    minMatches: 3
   },
   {
     q: "Write an if statement that prints 'OK' if x is greater than 10.",
-    sample: "if x > 10:\n    print('OK')"
+    sample: "if x > 10:\n    print('OK')",
+    keywords: ["if", "x", "10", "print", ">"],
+    minMatches: 4
   },
   {
     q: "How do you start a comment in Python, and why are comments useful?",
-    sample: "Use the # symbol. Comments are useful for explaining code and making it more readable."
+    sample: "Use the # symbol. Comments are useful for explaining code and making it more readable.",
+    keywords: ["#", "hash", "explain", "readable", "document"],
+    minMatches: 2
   },
   {
     q: "Write a for loop that prints the numbers 1 to 3.",
-    sample: "for i in range(1, 4):\n    print(i)"
+    sample: "for i in range(1, 4):\n    print(i)",
+    keywords: ["for", "range", "print", "1", "3"],
+    minMatches: 3
   }
 ];
 
@@ -206,21 +216,38 @@ function submitQuiz() {
     </div>`;
   });
 
-  // Written question - always show sample answer for self-assessment
+  // Written question - automatic keyword matching
+  const writtenAnswer = (userAnswers['written'] || '').toLowerCase();
+  let matchedKeywords = 0;
+  let matchedList = [];
+
+  selectedWritten.keywords.forEach(keyword => {
+    if (writtenAnswer.includes(keyword.toLowerCase())) {
+      matchedKeywords++;
+      matchedList.push(keyword);
+    }
+  });
+
+  const writtenCorrect = matchedKeywords >= selectedWritten.minMatches;
+  if (writtenCorrect) score++;
+
   reviewHtml += `<div class="quiz-question">
     <h3>Question 5 (Written)</h3>
     <p>${selectedWritten.q}</p>
     <p><strong>Your answer:</strong> ${userAnswers['written'] || 'Not answered'}</p>
+    <div class="feedback ${writtenCorrect ? 'correct' : 'incorrect'}">
+      <strong>${writtenCorrect ? '✓ Correct!' : '✗ Incorrect'}</strong><br>
+      Keywords found: ${matchedList.length > 0 ? matchedList.join(', ') : 'none'} (${matchedKeywords}/${selectedWritten.minMatches} required)<br>
+    </div>
     <div class="sample-answer">
       <strong>Sample answer:</strong><br>
       <pre>${selectedWritten.sample}</pre>
-      <em>Compare your answer to the sample. Give yourself 1 point if your answer is correct!</em>
     </div>
   </div>`;
 
   document.getElementById('quiz-area').classList.add('hidden');
   document.getElementById('quiz-results').classList.remove('hidden');
-  document.getElementById('score-text').innerHTML = `Your Score: ${score}/4 MCQs<br><small>+ Self-assess your written answer</small>`;
+  document.getElementById('score-text').innerHTML = `Your Score: ${score}/5`;
   document.getElementById('review-area').innerHTML = reviewHtml;
 }
 </script>
