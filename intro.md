@@ -1,6 +1,9 @@
 # Welcome to CodeVision Academy
 
-<img src="CV_White.png" alt="CodeVision Logo" width="150">
+```{image} CV_White.png
+:alt: CodeVision Logo
+:width: 150px
+```
 
 Welcome to the **CodeVision AI & Python Training Program** — a comprehensive, hands-on journey from Python fundamentals to building production-ready AI solutions.
 
