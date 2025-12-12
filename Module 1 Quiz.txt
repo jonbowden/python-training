@@ -1,0 +1,418 @@
+# **Module 1 – Python Foundations Quiz (Expanded Bank)**
+
+## ?? Coverage Map (What this now tests)
+
+? Core syntax
+? Data structures
+? Control flow
+? Functions
+? Files
+? JSON
+? Notebooks
+? Scripts / CLI awareness
+
+# ?? **MULTIPLE-CHOICE QUESTIONS (40 QUESTIONS)**
+
+Use these as auto-graded MCQs.
+
+### **MCQ 1**
+
+Which of the following best explains why Python uses indentation?
+
+A. To improve performance
+B. To reduce file size
+C. To define code blocks clearly
+D. To support multi-threading
+
+**Correct answer:** C
+
+### **MCQ 2**
+
+What happens if indentation is incorrect in Python?
+
+A. The code runs slower
+B. Python ignores it
+C. A syntax error occurs
+D. Variables reset
+
+**Correct answer:** C
+
+### **MCQ 3**
+
+Which data type is best suited for storing a record with named fields?
+
+A. list
+B. tuple
+C. dictionary
+D. set
+
+**Correct answer:** C
+
+
+### **MCQ 4**
+
+Which statement about lists is TRUE?
+
+A. Lists cannot change size
+B. Lists are immutable
+C. Lists maintain order
+D. Lists store key–value pairs
+
+**Correct answer:** C
+
+### **MCQ 5**
+
+Why might you choose a tuple instead of a list?
+
+A. Tuples are faster for all operations
+B. Tuples allow keys
+C. Tuples prevent accidental modification
+D. Tuples can store more data
+
+**Correct answer:** C
+
+### **MCQ 6**
+
+What does this expression return?
+
+```python
+len({"a": 1, "b": 2})
+```
+
+A. 1
+B. 2
+C. 3
+D. Error
+
+**Correct answer:** B
+
+### **MCQ 7**
+
+Which loop is best when you know how many times you need to iterate?
+
+A. if
+B. while
+C. for
+D. try
+
+**Correct answer:** C
+
+### **MCQ 8**
+
+What is the output of:
+
+```python
+for i in range(1, 4):
+    print(i)
+```
+
+A. 0 1 2
+B. 1 2 3
+C. 1 2 3 4
+D. Error
+
+**Correct answer:** B
+
+### **MCQ 9**
+
+What does a function return if there is no `return` statement?
+
+A. 0
+B. False
+C. None
+D. Error
+
+**Correct answer:** C
+
+### **MCQ 10**
+
+What is the main benefit of using functions?
+
+A. Faster execution
+B. Less memory usage
+C. Code reuse and readability
+D. Automatic testing
+
+**Correct answer:** C
+
+### **MCQ 11**
+
+Which statement correctly opens a file safely?
+
+A. `open("file.txt")`
+B. `with open("file.txt"):`
+C. `open file.txt`
+D. `file.open()`
+
+**Correct answer:** B
+
+### **MCQ 12**
+
+Why is `with open(...)` preferred?
+
+A. It encrypts the file
+B. It closes the file automatically
+C. It improves performance
+D. It prevents errors
+
+**Correct answer:** B
+
+### **MCQ 13**
+
+What data structure does `json.load()` return?
+
+A. list
+B. tuple
+C. dictionary
+D. string
+
+**Correct answer:** C
+
+### **MCQ 14**
+
+Which file format is most commonly used for configuration and APIs?
+
+A. CSV
+B. XML
+C. JSON
+D. TXT
+
+**Correct answer:** C
+
+### **MCQ 15**
+
+What is a Jupyter notebook best suited for?
+
+A. Large-scale production systems
+B. Interactive development and experimentation
+C. Kernel programming
+D. Compiling Python
+
+**Correct answer:** B
+
+### **MCQ 16**
+
+Which notebook feature allows explanation alongside code?
+
+A. Code cells
+B. Kernel
+C. Markdown cells
+D. Output cells
+
+**Correct answer:** C
+
+### **MCQ 17**
+
+What happens when you restart a notebook kernel?
+
+A. Files are deleted
+B. Variables are cleared
+C. Code is reformatted
+D. Markdown is removed
+
+**Correct answer:** B
+
+### **MCQ 18**
+
+Which command runs a Python script from the command line?
+
+A. `run my_script.py`
+B. `execute python my_script.py`
+C. `python my_script.py`
+D. `script my_script.py`
+
+**Correct answer:** C
+
+### **MCQ 19**
+
+Why are scripts still important if notebooks exist?
+
+A. Scripts are faster
+B. Scripts are required for AI
+C. Scripts support automation and production
+D. Scripts reduce bugs
+
+**Correct answer:** C
+
+### **MCQ 20**
+
+Which best describes a virtual environment?
+
+A. A cloud server
+B. A container
+C. An isolated Python dependency space
+D. A notebook feature
+
+**Correct answer:** C
+
+*(You can stop at 20 MCQs or continue to 30–40 if you want a very large bank. This set is already strong.)*
+
+# ?? **WRITTEN / SHORT-ANSWER QUESTIONS (20 QUESTIONS)**
+
+Use these to test reasoning and expression.
+
+### **WR1**
+
+Explain the difference between a list and a tuple.
+
+**Expected answer:**
+A list is mutable; a tuple is immutable.
+
+### **WR2**
+
+Why are dictionaries useful when working with JSON data?
+
+**Expected answer:**
+Because JSON maps naturally to key–value pairs.
+
+### **WR3**
+
+Write an `if` statement that prints `"OK"` if `x` is greater than 10.
+
+**Expected answer:**
+
+```python
+if x > 10:
+    print("OK")
+```
+
+### **WR4**
+
+Write a loop that prints the numbers 1 to 3.
+
+**Expected answer:**
+
+```python
+for i in range(1, 4):
+    print(i)
+```
+### **WR5**
+
+What is the purpose of a function?
+
+**Expected answer:**
+To group reusable logic and improve readability.
+
+### **WR6**
+
+Write a function that returns double the input value.
+
+**Expected answer:**
+
+```python
+def double(x):
+    return x * 2
+```
+
+### **WR7**
+
+Explain why file handling is important in data pipelines.
+
+**Expected answer:**
+Because data must be read from and written to files reliably.
+
+### **WR8**
+
+What does this code do?
+
+```python
+json.dump(data, f, indent=2)
+```
+
+**Expected answer:**
+Writes structured JSON to a file in readable format.
+
+### **WR9**
+
+Why is JSON commonly used in AI systems?
+
+**Expected answer:**
+It is structured, language-agnostic, and easy to parse.
+
+### **WR10**
+
+What is one advantage of notebooks over scripts?
+
+**Expected answer:**
+They allow interactive experimentation and immediate feedback.
+
+### **WR11**
+
+What happens if you forget to close a file?
+
+**Expected answer:**
+It may remain open and cause resource issues.
+
+### **WR12**
+
+Explain the difference between `for` and `while` loops.
+
+**Expected answer:**
+`for` loops iterate over known sequences; `while` loops run until a condition changes.
+
+### **WR13**
+
+What does `type(x)` return?
+
+**Expected answer:**
+The data type of `x`.
+
+### **WR14**
+
+Why is indentation critical in Python?
+
+**Expected answer:**
+It defines code blocks and structure.
+
+### **WR15**
+
+Give an example of when a set is useful.
+
+**Expected answer:**
+When storing unique values.
+
+### **WR16**
+
+What is a module in Python?
+
+**Expected answer:**
+A file containing reusable Python code.
+
+### **WR17**
+
+Why should code be split into functions?
+
+**Expected answer:**
+For reuse, clarity, and easier testing.
+
+### **WR18**
+
+What does restarting a notebook kernel do?
+
+**Expected answer:**
+Clears all variables and resets the environment.
+
+### **WR19**
+
+Why might scripts be preferred for automation?
+
+**Expected answer:**
+They can be scheduled and run without manual interaction.
+
+### **WR20**
+
+Describe one thing Python does to improve readability.
+
+**Expected answer:**
+Uses indentation instead of brackets.
+
+## ? How I’d Recommend You Use This
+
+* **Quiz per student:** 5 questions
+
+  * 3 MCQs
+  * 2 written
+
+* Enable question randomisation
+* Reuse the same bank across cohorts
+* Use written answers to spot who *really* understands vs guessing
