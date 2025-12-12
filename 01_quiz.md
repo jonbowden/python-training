@@ -16,6 +16,7 @@ Test your understanding of Python fundamentals. Click the button below to start 
 .feedback { padding: 15px; margin-top: 10px; border-radius: 5px; }
 .feedback.correct { background: #d4edda; border: 1px solid #28a745; }
 .feedback.incorrect { background: #f8d7da; border: 1px solid #dc3545; }
+.feedback.partial { background: #fff3cd; border: 1px solid #ffc107; }
 .score-display { font-size: 24px; font-weight: bold; text-align: center; padding: 20px; background: #e8f4fc; border-radius: 8px; margin: 20px 0; }
 .hidden { display: none; }
 .sample-answer { background: #fff3cd; padding: 10px; margin-top: 10px; border-radius: 4px; border: 1px solid #ffc107; }
@@ -104,6 +105,26 @@ async function saveScore(score, maxScore, answers) {
         return { saved: result.success, reason: result.error || 'saved' };
     } catch (err) {
         return { saved: false, reason: 'connection_error' };
+    }
+}
+
+async function gradeWithLLM(question, userAnswer, sampleAnswer) {
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            redirect: 'follow',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: 'gradeAnswer',
+                question: question,
+                userAnswer: userAnswer,
+                sampleAnswer: sampleAnswer
+            })
+        });
+        return await response.json();
+    } catch (err) {
+        console.error('LLM grading error:', err);
+        return { correct: false, score: 0, feedback: 'Grading unavailable' };
     }
 }
 
@@ -439,29 +460,29 @@ async function submitQuiz() {
     qNum++;
   });
 
-  // Grade Written questions
-  selectedWritten.forEach((written, idx) => {
-    const writtenAnswer = (userAnswers['written' + idx] || '').toLowerCase();
-    let matchedKeywords = 0;
-    let matchedList = [];
+  // Grade Written questions with LLM
+  document.getElementById('quiz-area').innerHTML = '<div style="text-align:center;padding:40px;"><strong>Grading your answers with AI...</strong></div>';
 
-    written.keywords.forEach(keyword => {
-      if (writtenAnswer.includes(keyword.toLowerCase())) {
-        matchedKeywords++;
-        matchedList.push(keyword);
-      }
-    });
+  const writtenResults = [];
+  for (let idx = 0; idx < selectedWritten.length; idx++) {
+    const written = selectedWritten[idx];
+    const writtenAnswer = userAnswers['written' + idx] || '';
+    const grading = await gradeWithLLM(written.q, writtenAnswer, written.sample);
+    writtenResults.push({ written, writtenAnswer, grading, idx });
+  }
 
-    const isCorrect = matchedKeywords >= written.minMatches;
-    if (isCorrect) score++;
+  for (const { written, writtenAnswer, grading, idx } of writtenResults) {
+    const isCorrect = grading.correct;
+    const gradingScore = grading.score || (isCorrect ? 1 : 0);
+    score += gradingScore;
 
     reviewHtml += `<div class="quiz-question">
       <h3>Question ${qNum} (Written)</h3>
       <p>${written.q}</p>
-      <p><strong>Your answer:</strong> ${userAnswers['written' + idx] || 'Not answered'}</p>
-      <div class="feedback ${isCorrect ? 'correct' : 'incorrect'}">
-        <strong>${isCorrect ? '✓ Correct!' : '✗ Incorrect'}</strong><br>
-        Keywords found: ${matchedList.length > 0 ? matchedList.join(', ') : 'none'} (${matchedKeywords}/${written.minMatches} required)<br>
+      <p><strong>Your answer:</strong> ${writtenAnswer || 'Not answered'}</p>
+      <div class="feedback ${isCorrect ? 'correct' : (grading.score === 0.5 ? 'partial' : 'incorrect')}">
+        <strong>${isCorrect ? '✓ Correct!' : (grading.score === 0.5 ? '◐ Partial Credit' : '✗ Incorrect')}</strong><br>
+        ${grading.feedback || ''}
       </div>
       <div class="sample-answer">
         <strong>Sample answer:</strong><br>
@@ -469,7 +490,7 @@ async function submitQuiz() {
       </div>
     </div>`;
     qNum++;
-  });
+  }
 
   document.getElementById('quiz-area').classList.add('hidden');
   document.getElementById('quiz-results').classList.remove('hidden');

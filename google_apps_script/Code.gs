@@ -8,6 +8,8 @@
  */
 
 const SPREADSHEET_ID = '1qu1q-j7JjKbthKv_LhMuTaSiuQsJ1ic7eaes3wW4lBY';
+const LLM_URL = 'https://ectodermoidal-sherron-volcanically.ngrok-free.dev/api/generate';
+const LLM_MODEL = 'gpt-oss:120b';
 
 // ============ HTTP HANDLERS ============
 
@@ -37,6 +39,9 @@ function doPost(e) {
         break;
       case 'validateToken':
         result = validateToken(data.token);
+        break;
+      case 'gradeAnswer':
+        result = gradeWrittenAnswer(data.question, data.userAnswer, data.sampleAnswer);
         break;
       default:
         result = { success: false, error: 'Unknown action' };
@@ -251,6 +256,100 @@ function getTranscript(token) {
     success: true,
     user: { email: decoded.email, name: userName },
     scores: userScores
+  };
+}
+
+// ============ LLM GRADING ============
+
+function gradeWrittenAnswer(question, userAnswer, sampleAnswer) {
+  if (!userAnswer || userAnswer.trim() === '') {
+    return { correct: false, feedback: 'No answer provided', score: 0 };
+  }
+
+  const prompt = `You are grading a student's answer to a Python programming quiz question.
+
+QUESTION: ${question}
+
+SAMPLE ANSWER: ${sampleAnswer}
+
+STUDENT'S ANSWER: ${userAnswer}
+
+Grade the student's answer. Be lenient - accept answers that demonstrate understanding even if worded differently.
+Consider partial credit for answers that show some understanding.
+
+Respond with ONLY a JSON object in this exact format (no markdown, no explanation):
+{"correct": true, "score": 1, "feedback": "brief feedback"}
+
+Where:
+- correct: true if answer demonstrates understanding (even if not word-perfect), false otherwise
+- score: 1 for correct, 0.5 for partial credit, 0 for incorrect
+- feedback: brief explanation (max 20 words)
+
+JSON response:`;
+
+  try {
+    const response = UrlFetchApp.fetch(LLM_URL, {
+      method: 'post',
+      contentType: 'application/json',
+      headers: {
+        'ngrok-skip-browser-warning': 'true'
+      },
+      payload: JSON.stringify({
+        model: LLM_MODEL,
+        prompt: prompt,
+        stream: false
+      }),
+      muteHttpExceptions: true
+    });
+
+    const responseCode = response.getResponseCode();
+    if (responseCode !== 200) {
+      Logger.log('LLM error: ' + responseCode + ' - ' + response.getContentText());
+      return fallbackGrading(userAnswer, sampleAnswer);
+    }
+
+    const result = JSON.parse(response.getContentText());
+    const llmResponse = result.response || '';
+
+    // Try to extract JSON from response
+    const jsonMatch = llmResponse.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const grading = JSON.parse(jsonMatch[0]);
+      return {
+        correct: grading.correct === true,
+        score: grading.score || (grading.correct ? 1 : 0),
+        feedback: grading.feedback || ''
+      };
+    }
+
+    // Fallback if can't parse
+    return fallbackGrading(userAnswer, sampleAnswer);
+
+  } catch (e) {
+    Logger.log('LLM grading error: ' + e);
+    return fallbackGrading(userAnswer, sampleAnswer);
+  }
+}
+
+function fallbackGrading(userAnswer, sampleAnswer) {
+  // Simple keyword matching as fallback
+  const userLower = userAnswer.toLowerCase();
+  const sampleWords = sampleAnswer.toLowerCase().split(/\s+/);
+  let matches = 0;
+
+  for (const word of sampleWords) {
+    if (word.length > 3 && userLower.includes(word)) {
+      matches++;
+    }
+  }
+
+  const ratio = matches / Math.max(sampleWords.length, 1);
+  const correct = ratio >= 0.3;
+
+  return {
+    correct: correct,
+    score: correct ? 1 : 0,
+    feedback: correct ? 'Answer accepted' : 'Key concepts missing'
   };
 }
 
