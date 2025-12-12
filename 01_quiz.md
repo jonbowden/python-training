@@ -53,7 +53,7 @@ Test your understanding of Python fundamentals. Click the button below to start 
 
 <script>
 // ============ CONFIGURATION ============
-const API_URL = 'https://script.google.com/macros/s/AKfycbw6q9uUO0ZthdpmiXwm11pTugUtPO_KXYgdBdoAzoEORQvZqkf1umoFmse2MDNwJyqH/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycby1sknmInGgsBQ--n3bBIlis-b-DpXYSJuSgNL_R9RJPW0Vg25uVtYddz0cvXuOSNpR/exec';
 const QUIZ_ID = 'module1-quiz';
 const AUTH_KEY = 'codevision_auth';
 
@@ -110,6 +110,7 @@ async function saveScore(score, maxScore, answers) {
 
 async function gradeWithLLM(question, userAnswer, sampleAnswer) {
     try {
+        console.log('Grading:', { question, userAnswer, sampleAnswer });
         const response = await fetch(API_URL, {
             method: 'POST',
             redirect: 'follow',
@@ -121,10 +122,12 @@ async function gradeWithLLM(question, userAnswer, sampleAnswer) {
                 sampleAnswer: sampleAnswer
             })
         });
-        return await response.json();
+        const result = await response.json();
+        console.log('Grading result:', result);
+        return result;
     } catch (err) {
         console.error('LLM grading error:', err);
-        return { correct: false, score: 0, feedback: 'Grading unavailable' };
+        return { correct: false, score: 0, feedback: 'Grading error: ' + err.message };
     }
 }
 

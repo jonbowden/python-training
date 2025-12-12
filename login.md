@@ -196,7 +196,7 @@
 <script>
 // ============ CONFIGURATION ============
 // IMPORTANT: Replace this URL after deploying the Google Apps Script
-const API_URL = 'https://script.google.com/macros/s/AKfycbw6q9uUO0ZthdpmiXwm11pTugUtPO_KXYgdBdoAzoEORQvZqkf1umoFmse2MDNwJyqH/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycby1sknmInGgsBQ--n3bBIlis-b-DpXYSJuSgNL_R9RJPW0Vg25uVtYddz0cvXuOSNpR/exec';
 
 // ============ AUTH STATE ============
 const AUTH_KEY = 'codevision_auth';

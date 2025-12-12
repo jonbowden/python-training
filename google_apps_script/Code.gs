@@ -441,6 +441,24 @@ function testLLMGrading() {
   return result;
 }
 
+function testDoPost() {
+  // Simulate what the quiz sends
+  const fakeEvent = {
+    postData: {
+      contents: JSON.stringify({
+        action: 'gradeAnswer',
+        question: 'Why split code into functions?',
+        userAnswer: 'For reusability and maintainability',
+        sampleAnswer: 'For reuse, clarity, and easier testing.'
+      })
+    }
+  };
+
+  Logger.log('Simulating doPost with action: gradeAnswer');
+  const result = doPost(fakeEvent);
+  Logger.log('Result: ' + result.getContent());
+}
+
 function testLLMConnection() {
   // Test basic LLM connectivity
   Logger.log('Testing LLM connection to: ' + LLM_URL);
