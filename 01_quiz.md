@@ -24,6 +24,8 @@ Test your understanding of Python fundamentals. Click the button below to start 
 .score-saved { background: #d1fae5; padding: 10px; margin-top: 10px; border-radius: 5px; text-align: center; color: #059669; }
 .score-not-saved { background: #fef3c7; padding: 10px; margin-top: 10px; border-radius: 5px; text-align: center; color: #92400e; }
 .user-greeting { background: #f0fdf4; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #86efac; }
+.user-greeting a.logout-link { float: right; color: #dc2626; text-decoration: none; font-size: 14px; }
+.user-greeting a.logout-link:hover { text-decoration: underline; }
 </style>
 
 <div class="quiz-container">
@@ -67,10 +69,15 @@ function updateAuthStatus() {
     const auth = getAuth();
     const statusDiv = document.getElementById('auth-status');
     if (auth && auth.user) {
-        statusDiv.innerHTML = `<div class="user-greeting">Logged in as <strong>${auth.user.name}</strong> - Your score will be saved to your transcript.</div>`;
+        statusDiv.innerHTML = `<div class="user-greeting"><a href="#" class="logout-link" onclick="handleLogout(); return false;">Logout</a>Logged in as <strong>${auth.user.name}</strong> - Your score will be saved to your transcript.</div>`;
     } else {
         statusDiv.innerHTML = `<div class="auth-notice"><a href="login.html">Login or Register</a> to save your quiz scores to your transcript.</div>`;
     }
+}
+
+function handleLogout() {
+    localStorage.removeItem(AUTH_KEY);
+    window.location.href = 'login.html';
 }
 
 async function saveScore(score, maxScore, answers) {

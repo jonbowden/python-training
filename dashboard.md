@@ -119,6 +119,19 @@
 .refresh-btn:hover {
     background: #e5e7eb;
 }
+.logout-btn {
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.logout-btn:hover {
+    background: rgba(255,255,255,0.3);
+}
 </style>
 
 <div class="dashboard-container">
@@ -132,6 +145,7 @@
         <div class="user-header">
             <h2>Welcome, <span id="dash-user-name"></span>!</h2>
             <p><span id="dash-user-email"></span></p>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
         </div>
 
         <div class="stats-grid">
@@ -188,6 +202,11 @@ function getAuth() {
     } catch {
         return null;
     }
+}
+
+function handleLogout() {
+    localStorage.removeItem(AUTH_KEY);
+    window.location.href = 'login.html';
 }
 
 async function loadTranscript() {
