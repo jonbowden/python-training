@@ -1,7 +1,5 @@
 # Welcome to CodeVision Academy
 
-![CodeVision Logo](CV_White.png)
-
 Welcome to the **CodeVision AI & Python Training Program** — a comprehensive, hands-on journey from Python fundamentals to building production-ready AI solutions.
 
 This program is designed for professionals who want to understand and apply AI technologies in real-world business contexts. Whether you're starting from scratch or looking to formalise your existing knowledge, this training will take you from zero to confident AI practitioner.
