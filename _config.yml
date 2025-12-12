@@ -1,0 +1,24 @@
+title: CodeVision Python Training
+author: CodeVision Team
+logo: CV_White.png
+copyright: "2025"
+
+execute:
+  execute_notebooks: force
+
+launch_buttons:
+  notebook_interface: "classic"
+  binderhub_url: "https://mybinder.org"
+  colab_url: "https://colab.research.google.com"
+
+repository:
+  url: https://github.com/jonbowden/python-training
+  path_to_book: "."
+  branch: main
+
+html:
+  home_page_in_navbar: true
+  use_edit_page_button: false
+  use_repository_button: true
+  use_issues_button: false
+  use_download_button: true
