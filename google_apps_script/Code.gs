@@ -7,7 +7,7 @@
  * Sheet 2 "Scores": email | quiz_id | score | max_score | percentage | timestamp | answers_json
  */
 
-const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID_HERE'; // Replace after creating spreadsheet
+const SPREADSHEET_ID = '1qu1q-j7JjKbthKv_LhMuTaSiuQsJ1ic7eaes3wW4lBY';
 
 // ============ HTTP HANDLERS ============
 

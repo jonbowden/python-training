@@ -178,7 +178,7 @@
 
 <script>
 // ============ CONFIGURATION ============
-const API_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+const API_URL = 'https://script.google.com/macros/s/AKfycbw6q9uUO0ZthdpmiXwm11pTugUtPO_KXYgdBdoAzoEORQvZqkf1umoFmse2MDNwJyqH/exec';
 const AUTH_KEY = 'codevision_auth';
 
 function getAuth() {
