@@ -30,7 +30,11 @@ import io
 
 # Configuration
 DRIVE_FOLDER_ID = '1il2tcPvs2RwMmR8argOyMMimIxfO-aKe'
-SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
+RESPONSE_SPREADSHEET_ID = '1drrRJD40RDgcUlCweAh0ijlfircIQbzCagsoYeWqsxQ'
+SCOPES = [
+    'https://www.googleapis.com/auth/drive.readonly',
+    'https://www.googleapis.com/auth/spreadsheets.readonly'
+]
 
 
 def get_env_var(name: str) -> str:
@@ -42,14 +46,68 @@ def get_env_var(name: str) -> str:
     return value
 
 
-def authenticate_drive():
-    """Authenticate with Google Drive using service account credentials."""
+def authenticate_google():
+    """Authenticate with Google APIs using service account credentials."""
     creds_json = get_env_var('GOOGLE_SERVICE_ACCOUNT')
     creds_dict = json.loads(creds_json)
     credentials = service_account.Credentials.from_service_account_info(
         creds_dict, scopes=SCOPES
     )
-    return build('drive', 'v3', credentials=credentials)
+    drive = build('drive', 'v3', credentials=credentials)
+    sheets = build('sheets', 'v4', credentials=credentials)
+    return drive, sheets
+
+
+def get_email_mapping(sheets) -> dict:
+    """
+    Read the form response spreadsheet to get email -> file URL mapping.
+    Returns dict of {file_id: email}
+    """
+    try:
+        result = sheets.spreadsheets().values().get(
+            spreadsheetId=RESPONSE_SPREADSHEET_ID,
+            range='A:Z'  # Get all columns
+        ).execute()
+
+        rows = result.get('values', [])
+        if not rows:
+            print("Warning: Response spreadsheet is empty")
+            return {}
+
+        # Find column indices (header row)
+        headers = [h.lower().strip() for h in rows[0]]
+        email_col = None
+        file_col = None
+
+        for i, h in enumerate(headers):
+            if 'email' in h:
+                email_col = i
+            if 'notebook' in h or 'file' in h or 'upload' in h:
+                file_col = i
+
+        if email_col is None or file_col is None:
+            print(f"Warning: Could not find email or file columns. Headers: {headers}")
+            return {}
+
+        # Build mapping
+        mapping = {}
+        for row in rows[1:]:  # Skip header
+            if len(row) > max(email_col, file_col):
+                email = row[email_col].strip().lower() if row[email_col] else None
+                file_url = row[file_col] if len(row) > file_col else None
+
+                if email and file_url:
+                    # Extract file ID from Drive URL
+                    file_id_match = re.search(r'[-\w]{25,}', file_url)
+                    if file_id_match:
+                        mapping[file_id_match.group(0)] = email
+
+        print(f"Loaded {len(mapping)} email mappings from response sheet")
+        return mapping
+
+    except Exception as e:
+        print(f"Warning: Could not read response spreadsheet: {e}")
+        return {}
 
 
 def list_submissions(drive, module: int) -> list[dict]:
@@ -285,7 +343,7 @@ def submit_score(email: str, module_id: str, score: int, max_score: int, details
         return False
 
 
-def grade_submission(drive, submission: dict, module: int, template_path: str) -> dict:
+def grade_submission(drive, submission: dict, module: int, template_path: str, email_mapping: dict) -> dict:
     """Grade a single submission and return results."""
     filename = submission['name']
     file_id = submission['id']
@@ -300,11 +358,13 @@ def grade_submission(drive, submission: dict, module: int, template_path: str) -
         'details': {}
     }
 
-    # Extract email from filename
-    email = extract_email_from_filename(filename)
+    # Try to get email from response spreadsheet first, then fall back to filename
+    email = email_mapping.get(file_id)
+    if not email:
+        email = extract_email_from_filename(filename)
     if not email:
         result['status'] = 'error'
-        result['details'] = {'error': 'Could not extract email from filename'}
+        result['details'] = {'error': 'Could not find email (not in spreadsheet or filename)'}
         return result
 
     result['email'] = email
@@ -404,9 +464,13 @@ def main():
     print(f"Template: {template_path}")
     print()
 
-    # Authenticate with Google Drive
-    print("Authenticating with Google Drive...")
-    drive = authenticate_drive()
+    # Authenticate with Google APIs
+    print("Authenticating with Google...")
+    drive, sheets = authenticate_google()
+
+    # Load email mapping from response spreadsheet
+    print("Loading email mappings from response spreadsheet...")
+    email_mapping = get_email_mapping(sheets)
 
     # List submissions
     print(f"Listing submissions for Module {module}...")
@@ -423,7 +487,10 @@ def main():
     results = []
     for submission in submissions:
         filename = submission['name']
-        email = extract_email_from_filename(filename)
+        file_id = submission['id']
+
+        # Get email from mapping or filename
+        email = email_mapping.get(file_id) or extract_email_from_filename(filename)
 
         # Apply student filter if provided
         if student_filter:
@@ -431,7 +498,7 @@ def main():
                 continue
 
         print(f"Processing: {filename}")
-        result = grade_submission(drive, submission, module, str(template_path))
+        result = grade_submission(drive, submission, module, str(template_path), email_mapping)
         results.append(result)
 
         # Print result summary
