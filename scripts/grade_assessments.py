@@ -58,21 +58,52 @@ def authenticate_google():
     return drive, sheets
 
 
-def get_email_mapping(sheets) -> dict:
+def get_dashboard_email_mapping(sheets) -> dict:
     """
-    Read the form response spreadsheet to get email -> file URL mapping.
-    Returns dict of {file_id: email}
+    Read EmailMappings sheet to map Google emails to dashboard emails.
+    Returns dict of {google_email: dashboard_email}
     """
     try:
         result = sheets.spreadsheets().values().get(
             spreadsheetId=RESPONSE_SPREADSHEET_ID,
-            range='A:Z'  # Get all columns
+            range='EmailMappings!A:B'
+        ).execute()
+
+        rows = result.get('values', [])
+        mapping = {}
+        for row in rows[1:]:  # Skip header
+            if len(row) >= 2:
+                google_email = row[0].strip().lower()
+                dashboard_email = row[1].strip().lower()
+                if google_email and dashboard_email:
+                    mapping[google_email] = dashboard_email
+
+        if mapping:
+            print(f"Loaded {len(mapping)} dashboard email mappings")
+        return mapping
+
+    except Exception as e:
+        # Sheet might not exist yet - that's OK
+        return {}
+
+
+def get_email_mapping(sheets) -> tuple[dict, dict]:
+    """
+    Read the form response spreadsheet to get email -> file URL mapping.
+    Returns tuple of (file_id_to_email, google_to_dashboard_email)
+    """
+    dashboard_mapping = get_dashboard_email_mapping(sheets)
+
+    try:
+        result = sheets.spreadsheets().values().get(
+            spreadsheetId=RESPONSE_SPREADSHEET_ID,
+            range='A:Z'  # Get all columns from first sheet
         ).execute()
 
         rows = result.get('values', [])
         if not rows:
             print("Warning: Response spreadsheet is empty")
-            return {}
+            return {}, dashboard_mapping
 
         # Find column indices (header row)
         headers = [h.lower().strip() for h in rows[0]]
@@ -87,7 +118,7 @@ def get_email_mapping(sheets) -> dict:
 
         if email_col is None or file_col is None:
             print(f"Warning: Could not find email or file columns. Headers: {headers}")
-            return {}
+            return {}, dashboard_mapping
 
         # Build mapping
         mapping = {}
@@ -100,14 +131,16 @@ def get_email_mapping(sheets) -> dict:
                     # Extract file ID from Drive URL
                     file_id_match = re.search(r'[-\w]{25,}', file_url)
                     if file_id_match:
-                        mapping[file_id_match.group(0)] = email
+                        # Apply dashboard email mapping if exists
+                        final_email = dashboard_mapping.get(email, email)
+                        mapping[file_id_match.group(0)] = final_email
 
         print(f"Loaded {len(mapping)} email mappings from response sheet")
-        return mapping
+        return mapping, dashboard_mapping
 
     except Exception as e:
         print(f"Warning: Could not read response spreadsheet: {e}")
-        return {}
+        return {}, dashboard_mapping
 
 
 def list_submissions(drive, module: int) -> list[dict]:
@@ -470,7 +503,7 @@ def main():
 
     # Load email mapping from response spreadsheet
     print("Loading email mappings from response spreadsheet...")
-    email_mapping = get_email_mapping(sheets)
+    email_mapping, _ = get_email_mapping(sheets)
 
     # List submissions
     print(f"Listing submissions for Module {module}...")
