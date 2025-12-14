@@ -11,6 +11,10 @@ const SPREADSHEET_ID = '1qu1q-j7JjKbthKv_LhMuTaSiuQsJ1ic7eaes3wW4lBY';
 const LLM_URL = 'https://ectodermoidal-sherron-volcanically.ngrok-free.dev/api/generate';
 const LLM_MODEL = 'gpt-oss:120b';
 
+// Admin API key for server-to-server authentication (grading system)
+// This should match the ADMIN_API_KEY secret in GitHub Actions
+const ADMIN_API_KEY = 'CodeVisionGrading2024SecretKey';
+
 // ============ HTTP HANDLERS ============
 
 function doPost(e) {
@@ -42,6 +46,12 @@ function doPost(e) {
         break;
       case 'gradeAnswer':
         result = gradeWrittenAnswer(data.question, data.userAnswer, data.sampleAnswer);
+        break;
+      case 'submitAssessment':
+        result = submitAssessment(data.adminKey, data.email, data.moduleId, data.score, data.maxScore, data.details);
+        break;
+      case 'isAlreadyGraded':
+        result = isAlreadyGraded(data.email, data.moduleId);
         break;
       default:
         result = { success: false, error: 'Unknown action' };
@@ -239,12 +249,24 @@ function getTranscript(token) {
 
   for (let i = 1; i < allScores.length; i++) {
     if (allScores[i][0].toLowerCase() === decoded.email) {
+      // Parse answersJson if it exists (column 7, index 6)
+      let details = null;
+      try {
+        const answersJson = allScores[i][6];
+        if (answersJson && answersJson.trim()) {
+          details = JSON.parse(answersJson);
+        }
+      } catch (e) {
+        // Ignore parse errors for malformed JSON
+      }
+
       userScores.push({
         quizId: allScores[i][1],
         score: allScores[i][2],
         maxScore: allScores[i][3],
         percentage: allScores[i][4],
-        timestamp: allScores[i][5]
+        timestamp: allScores[i][5],
+        details: details
       });
     }
   }
@@ -257,6 +279,82 @@ function getTranscript(token) {
     user: { email: decoded.email, name: userName },
     scores: userScores
   };
+}
+
+// ============ ASSESSMENT GRADING (Server-to-Server) ============
+
+/**
+ * Submit assessment score from the grading system
+ * Uses admin API key instead of user token for authentication
+ */
+function submitAssessment(adminKey, email, moduleId, score, maxScore, details) {
+  // Verify admin key
+  if (adminKey !== ADMIN_API_KEY) {
+    return { success: false, error: 'Invalid admin key' };
+  }
+
+  if (!email || !moduleId) {
+    return { success: false, error: 'Email and moduleId are required' };
+  }
+
+  email = email.toLowerCase().trim();
+
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const scoresSheet = ss.getSheetByName('Scores') || createScoresSheet(ss);
+
+  const percentage = Math.round((score / maxScore) * 100);
+  const timestamp = new Date().toISOString();
+  const detailsJson = JSON.stringify(details || {});
+
+  scoresSheet.appendRow([
+    email,
+    moduleId,
+    score,
+    maxScore,
+    percentage,
+    timestamp,
+    detailsJson
+  ]);
+
+  return {
+    success: true,
+    message: 'Assessment score saved successfully',
+    data: {
+      email: email,
+      moduleId: moduleId,
+      score: score,
+      maxScore: maxScore,
+      percentage: percentage
+    }
+  };
+}
+
+/**
+ * Check if a student has already been graded for a specific module assessment
+ */
+function isAlreadyGraded(email, moduleId) {
+  if (!email || !moduleId) {
+    return { success: false, error: 'Email and moduleId are required' };
+  }
+
+  email = email.toLowerCase().trim();
+
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const scoresSheet = ss.getSheetByName('Scores');
+
+  if (!scoresSheet) {
+    return { success: true, graded: false };
+  }
+
+  const allScores = scoresSheet.getDataRange().getValues();
+
+  for (let i = 1; i < allScores.length; i++) {
+    if (allScores[i][0].toLowerCase() === email && allScores[i][1] === moduleId) {
+      return { success: true, graded: true };
+    }
+  }
+
+  return { success: true, graded: false };
 }
 
 // ============ LLM GRADING ============

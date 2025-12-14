@@ -1,0 +1,39 @@
+name: Grade Assessments
+
+on:
+  workflow_dispatch:
+    inputs:
+      module:
+        description: 'Module number (1, 2, etc.)'
+        required: true
+        type: string
+        default: '1'
+      student_email:
+        description: 'Specific student email (optional - grades all if empty)'
+        required: false
+        type: string
+
+jobs:
+  grade:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements-grading.txt
+
+      - name: Run grading
+        env:
+          GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+          APPS_SCRIPT_URL: ${{ secrets.APPS_SCRIPT_URL }}
+          ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
+        run: |
+          python scripts/grade_assessments.py \
+            --module ${{ inputs.module }} \
+            --student "${{ inputs.student_email }}"

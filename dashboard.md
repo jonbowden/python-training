@@ -132,6 +132,75 @@
 .logout-btn:hover {
     background: rgba(255,255,255,0.3);
 }
+/* Assessment-specific styles */
+.score-badge.score-assessment {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+.assessment-row {
+    cursor: pointer;
+}
+.assessment-row:hover {
+    background: #f0f9ff !important;
+}
+.assessment-details {
+    display: none;
+    background: #f8fafc;
+    padding: 15px;
+    border-left: 3px solid #2563eb;
+    margin: 5px 0;
+}
+.assessment-details.expanded {
+    display: block;
+}
+.exercise-scores {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.exercise-score {
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+}
+.exercise-score .name {
+    font-size: 0.85em;
+    color: #666;
+}
+.exercise-score .points {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #2563eb;
+}
+.syntax-errors {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 5px;
+    padding: 10px;
+}
+.syntax-errors h4 {
+    color: #dc2626;
+    margin: 0 0 10px 0;
+    font-size: 0.9em;
+}
+.syntax-errors ul {
+    margin: 0;
+    padding-left: 20px;
+    color: #991b1b;
+    font-family: monospace;
+    font-size: 0.85em;
+}
+.expand-icon {
+    display: inline-block;
+    width: 20px;
+    transition: transform 0.2s;
+}
+.expand-icon.rotated {
+    transform: rotate(90deg);
+}
 </style>
 
 <div class="dashboard-container">
@@ -168,16 +237,16 @@
         </div>
 
         <div class="transcript-section">
-            <h3>Quiz History <button class="refresh-btn" onclick="loadTranscript()">Refresh</button></h3>
+            <h3>Progress History <button class="refresh-btn" onclick="loadTranscript()">Refresh</button></h3>
             <div id="transcript-loading" class="loading">Loading your scores...</div>
             <div id="transcript-empty" class="no-scores" style="display: none;">
-                <p>You haven't taken any quizzes yet.</p>
+                <p>You haven't completed any quizzes or assessments yet.</p>
                 <p>Start with <a href="01_quiz.html">Module 1 Quiz</a> to begin tracking your progress!</p>
             </div>
             <table id="transcript-table" class="transcript-table" style="display: none;">
                 <thead>
                     <tr>
-                        <th>Quiz</th>
+                        <th>Activity</th>
                         <th>Score</th>
                         <th>Result</th>
                         <th>Date</th>
@@ -262,12 +331,15 @@ function displayScores(scores) {
     const tbody = document.getElementById('transcript-body');
     tbody.innerHTML = '';
 
-    const quizNames = {
-        'module1-quiz': 'Module 1: Python Foundations'
+    const activityNames = {
+        'module1-quiz': 'Module 1: Quiz',
+        'module1-assessment': 'Module 1: Assessment',
+        'module2-quiz': 'Module 2: Quiz',
+        'module2-assessment': 'Module 2: Assessment'
     };
 
-    scores.forEach(score => {
-        const row = document.createElement('tr');
+    scores.forEach((score, index) => {
+        const isAssessment = score.quizId && score.quizId.includes('-assessment');
         const passed = score.percentage >= 70;
         const date = new Date(score.timestamp).toLocaleDateString('en-AU', {
             day: 'numeric',
@@ -277,16 +349,89 @@ function displayScores(scores) {
             minute: '2-digit'
         });
 
+        const row = document.createElement('tr');
+        if (isAssessment) {
+            row.className = 'assessment-row';
+            row.onclick = () => toggleAssessmentDetails(index);
+        }
+
+        const badgeClass = isAssessment ? 'score-assessment' : (passed ? 'score-pass' : 'score-fail');
+        const badgeText = isAssessment ? 'ASSESSMENT' : (passed ? 'PASS' : 'FAIL');
+        const expandIcon = isAssessment ? '<span class="expand-icon" id="icon-' + index + '">&#9654;</span> ' : '';
+
         row.innerHTML = `
-            <td>${quizNames[score.quizId] || score.quizId}</td>
+            <td>${expandIcon}${activityNames[score.quizId] || score.quizId}</td>
             <td>${score.score}/${score.maxScore} (${score.percentage}%)</td>
-            <td><span class="score-badge ${passed ? 'score-pass' : 'score-fail'}">${passed ? 'PASS' : 'FAIL'}</span></td>
+            <td><span class="score-badge ${badgeClass}">${badgeText}</span></td>
             <td>${date}</td>
         `;
         tbody.appendChild(row);
+
+        // Add expandable details row for assessments
+        if (isAssessment && score.details) {
+            const detailsRow = document.createElement('tr');
+            detailsRow.innerHTML = `<td colspan="4" style="padding: 0;"><div class="assessment-details" id="details-${index}">${renderAssessmentDetails(score.details)}</div></td>`;
+            tbody.appendChild(detailsRow);
+        }
     });
 
     document.getElementById('transcript-table').style.display = 'table';
+}
+
+function toggleAssessmentDetails(index) {
+    const details = document.getElementById('details-' + index);
+    const icon = document.getElementById('icon-' + index);
+    if (details) {
+        details.classList.toggle('expanded');
+        if (icon) {
+            icon.classList.toggle('rotated');
+        }
+    }
+}
+
+function renderAssessmentDetails(details) {
+    // Check for syntax errors first
+    if (details.syntax_errors && details.syntax_errors.length > 0) {
+        return `
+            <div class="syntax-errors">
+                <h4>Syntax Errors (Code could not be executed)</h4>
+                <ul>
+                    ${details.syntax_errors.map(err => `<li>${escapeHtml(err)}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+
+    // Show exercise scores
+    if (details.exercise_scores) {
+        const exercises = Object.entries(details.exercise_scores);
+        return `
+            <div class="exercise-scores">
+                ${exercises.map(([name, scores]) => `
+                    <div class="exercise-score">
+                        <div class="name">${escapeHtml(name)}</div>
+                        <div class="points">${scores[0]}/${scores[1]}</div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    // Fallback for other details
+    if (details.error) {
+        return `<p style="color: #dc2626;">${escapeHtml(details.error)}</p>`;
+    }
+    if (details.reason) {
+        return `<p style="color: #666;">${escapeHtml(details.reason)}</p>`;
+    }
+
+    return '<p style="color: #666;">No additional details available.</p>';
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 function updateStats(scores) {

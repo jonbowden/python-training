@@ -9,3 +9,6 @@ myst.yml
 python-training/
 repo_token.txt
 *.gs.txt
+venv/
+codevision-grading-*.json
+*-service-account*.json
