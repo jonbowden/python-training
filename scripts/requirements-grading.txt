@@ -3,3 +3,4 @@ google-auth>=2.0.0
 nbclient>=0.7.0
 nbformat>=5.0.0
 requests>=2.25.0
+ipykernel>=6.0.0
