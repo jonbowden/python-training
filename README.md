@@ -43,7 +43,14 @@ Jupyter Book-based Python training course with:
 2. Create new form with:
    - Title: "Module 1 Assessment Submission"
    - File upload question (allow .ipynb or turn off file type restrictions)
-3. Get the public form URL (ends with `/viewform`)
+3. **Configure security settings** (Settings gear icon → Responses):
+   - Turn ON **"Collect email addresses"**
+   - Select **"Verified"** (requires Google sign-in)
+   - Optionally: **"Limit to 1 response"** (prevents multiple submissions)
+
+   This prevents students from submitting under someone else's email.
+   Students are already signed into Google for Colab, so no extra friction.
+4. Get the public form URL (ends with `/viewform`)
 
 ### Step 2: Create Destination Folder
 1. Create folder in Google Drive: `Python_Training_Submission`

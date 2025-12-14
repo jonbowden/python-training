@@ -31,7 +31,12 @@
  * 1. Go to forms.google.com
  * 2. Create form with file upload question
  * 3. Turn OFF file type restrictions (or .ipynb won't work)
- * 4. Copy the PUBLIC URL (ends with /viewform)
+ * 4. SECURITY: Settings → Responses:
+ *    - "Collect email addresses" = ON
+ *    - "Verified" = ON (requires Google sign-in)
+ *    - "Limit to 1 response" = ON (optional)
+ *    This prevents fake submissions under other students' emails.
+ * 5. Copy the PUBLIC URL (ends with /viewform)
  *
  * STEP 2: Create Destination Folder
  * ----------------------------------
