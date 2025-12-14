@@ -15,6 +15,15 @@ const LLM_MODEL = 'gpt-oss:120b';
 // This should match the ADMIN_API_KEY secret in GitHub Actions
 const ADMIN_API_KEY = 'CodeVisionGrading2024SecretKey';
 
+// GitHub repository details for triggering workflows
+const GITHUB_REPO_OWNER = 'jonbowden';
+const GITHUB_REPO_NAME = 'python-training';
+// Store this in Script Properties (File > Project Properties > Script Properties)
+// Key: GITHUB_TOKEN, Value: your GitHub PAT with workflow scope
+function getGitHubToken() {
+  return PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+}
+
 // ============ HTTP HANDLERS ============
 
 function doPost(e) {
@@ -52,6 +61,12 @@ function doPost(e) {
         break;
       case 'isAlreadyGraded':
         result = isAlreadyGraded(data.email, data.moduleId);
+        break;
+      case 'checkAdmin':
+        result = checkAdmin(data.token);
+        break;
+      case 'triggerGrading':
+        result = triggerGrading(data.token, data.module, data.studentEmail);
         break;
       default:
         result = { success: false, error: 'Unknown action' };
@@ -355,6 +370,93 @@ function isAlreadyGraded(email, moduleId) {
   }
 
   return { success: true, graded: false };
+}
+
+// ============ ADMIN FUNCTIONS ============
+
+/**
+ * Check if the current user is an admin
+ */
+function checkAdmin(token) {
+  const decoded = decodeToken(token);
+  if (!decoded) {
+    return { success: false, error: 'Invalid or expired token' };
+  }
+
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const usersSheet = ss.getSheetByName('Users');
+
+  if (!usersSheet) {
+    return { success: false, isAdmin: false };
+  }
+
+  const users = usersSheet.getDataRange().getValues();
+  const headers = users[0];
+
+  // Find is_admin column (should be column 6, index 5)
+  let adminCol = -1;
+  for (let i = 0; i < headers.length; i++) {
+    if (headers[i].toString().toLowerCase().includes('admin')) {
+      adminCol = i;
+      break;
+    }
+  }
+
+  for (let i = 1; i < users.length; i++) {
+    if (users[i][0].toLowerCase() === decoded.email) {
+      const isAdmin = adminCol >= 0 && (users[i][adminCol] === true || users[i][adminCol] === 'TRUE' || users[i][adminCol] === 1);
+      return { success: true, isAdmin: isAdmin };
+    }
+  }
+
+  return { success: true, isAdmin: false };
+}
+
+/**
+ * Trigger GitHub Actions grading workflow (admin only)
+ */
+function triggerGrading(token, module, studentEmail) {
+  // Verify user is admin
+  const adminCheck = checkAdmin(token);
+  if (!adminCheck.success || !adminCheck.isAdmin) {
+    return { success: false, error: 'Admin access required' };
+  }
+
+  const githubToken = getGitHubToken();
+  if (!githubToken) {
+    return { success: false, error: 'GitHub token not configured. Add GITHUB_TOKEN to Script Properties.' };
+  }
+
+  const url = `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/actions/workflows/grade-assessments.yml/dispatches`;
+
+  try {
+    const response = UrlFetchApp.fetch(url, {
+      method: 'post',
+      headers: {
+        'Authorization': `Bearer ${githubToken}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      payload: JSON.stringify({
+        ref: 'main',
+        inputs: {
+          module: String(module || '1'),
+          student_email: studentEmail || ''
+        }
+      }),
+      muteHttpExceptions: true
+    });
+
+    const code = response.getResponseCode();
+    if (code === 204) {
+      return { success: true, message: 'Grading workflow triggered successfully' };
+    } else {
+      const body = response.getContentText();
+      return { success: false, error: `GitHub API error (${code}): ${body}` };
+    }
+  } catch (e) {
+    return { success: false, error: 'Failed to trigger workflow: ' + e.message };
+  }
 }
 
 // ============ LLM GRADING ============

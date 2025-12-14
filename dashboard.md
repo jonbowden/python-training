@@ -201,6 +201,65 @@
 .expand-icon.rotated {
     transform: rotate(90deg);
 }
+/* Admin Panel Styles */
+.admin-panel {
+    background: linear-gradient(135deg, #dc2626 0%, #9333ea 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+.admin-panel h3 {
+    margin: 0 0 15px 0;
+    color: white;
+}
+.admin-panel .admin-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.admin-panel select, .admin-panel input {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+}
+.admin-panel select {
+    min-width: 120px;
+}
+.admin-panel input {
+    flex: 1;
+    min-width: 200px;
+}
+.admin-panel button {
+    padding: 10px 20px;
+    background: white;
+    color: #dc2626;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.admin-panel button:hover {
+    background: #f3f4f6;
+}
+.admin-panel button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.admin-panel .status-msg {
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 5px;
+    font-size: 0.9em;
+}
+.admin-panel .status-msg.success {
+    background: rgba(255,255,255,0.2);
+}
+.admin-panel .status-msg.error {
+    background: rgba(0,0,0,0.2);
+}
 </style>
 
 <div class="dashboard-container">
@@ -215,6 +274,20 @@
             <h2>Welcome, <span id="dash-user-name"></span>!</h2>
             <p><span id="dash-user-email"></span></p>
             <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+
+        <div id="admin-panel" class="admin-panel" style="display: none;">
+            <h3>Admin Panel</h3>
+            <div class="admin-controls">
+                <select id="grade-module">
+                    <option value="1">Module 1</option>
+                    <option value="2">Module 2</option>
+                    <option value="3">Module 3</option>
+                </select>
+                <input type="email" id="grade-student" placeholder="Student email (optional - leave blank for all)">
+                <button id="grade-btn" onclick="triggerGrading()">Grade Assessments</button>
+            </div>
+            <div id="grade-status"></div>
         </div>
 
         <div class="stats-grid">
@@ -276,6 +349,67 @@ function getAuth() {
 function handleLogout() {
     localStorage.removeItem(AUTH_KEY);
     window.location.href = 'login.html';
+}
+
+async function checkAdminStatus() {
+    const auth = getAuth();
+    if (!auth || !auth.token) return;
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            redirect: 'follow',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'checkAdmin', token: auth.token })
+        });
+        const result = await response.json();
+
+        if (result.success && result.isAdmin) {
+            document.getElementById('admin-panel').style.display = 'block';
+        }
+    } catch (err) {
+        console.error('Admin check failed:', err);
+    }
+}
+
+async function triggerGrading() {
+    const auth = getAuth();
+    if (!auth || !auth.token) return;
+
+    const module = document.getElementById('grade-module').value;
+    const studentEmail = document.getElementById('grade-student').value.trim();
+    const btn = document.getElementById('grade-btn');
+    const status = document.getElementById('grade-status');
+
+    btn.disabled = true;
+    btn.textContent = 'Triggering...';
+    status.innerHTML = '';
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            redirect: 'follow',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: 'triggerGrading',
+                token: auth.token,
+                module: module,
+                studentEmail: studentEmail
+            })
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            status.innerHTML = '<div class="status-msg success">Grading workflow started! Check GitHub Actions for progress.</div>';
+        } else {
+            status.innerHTML = '<div class="status-msg error">Error: ' + (result.error || 'Unknown error') + '</div>';
+        }
+    } catch (err) {
+        status.innerHTML = '<div class="status-msg error">Connection error: ' + err.message + '</div>';
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Grade Assessments';
 }
 
 async function loadTranscript() {
@@ -446,6 +580,9 @@ function updateStats(scores) {
     document.getElementById('stat-passed').textContent = passed;
 }
 
-document.addEventListener('DOMContentLoaded', loadTranscript);
+document.addEventListener('DOMContentLoaded', () => {
+    loadTranscript();
+    checkAdminStatus();
+});
 </script>
 ```
