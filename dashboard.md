@@ -290,6 +290,7 @@
             <div id="grade-status"></div>
         </div>
 
+        <h4 style="margin-bottom: 10px; color: #374151;">Quiz Progress</h4>
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="number" id="stat-quizzes">0</div>
@@ -305,6 +306,26 @@
             </div>
             <div class="stat-card">
                 <div class="number" id="stat-passed">0</div>
+                <div class="label">Passed (70%+)</div>
+            </div>
+        </div>
+
+        <h4 style="margin-bottom: 10px; color: #374151;">Assessment Progress</h4>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="number" id="stat-assessments">0</div>
+                <div class="label">Assessments Taken</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="stat-assess-avg">0%</div>
+                <div class="label">Average Score</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="stat-assess-best">0%</div>
+                <div class="label">Best Score</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="stat-assess-passed">0</div>
                 <div class="label">Passed (70%+)</div>
             </div>
         </div>
@@ -569,15 +590,31 @@ function escapeHtml(text) {
 }
 
 function updateStats(scores) {
-    const total = scores.length;
-    const passed = scores.filter(s => s.percentage >= 70).length;
-    const avg = total > 0 ? Math.round(scores.reduce((a, b) => a + b.percentage, 0) / total) : 0;
-    const best = total > 0 ? Math.max(...scores.map(s => s.percentage)) : 0;
+    // Separate quizzes and assessments
+    const quizzes = scores.filter(s => !s.quizId || !s.quizId.includes('-assessment'));
+    const assessments = scores.filter(s => s.quizId && s.quizId.includes('-assessment'));
 
-    document.getElementById('stat-quizzes').textContent = total;
-    document.getElementById('stat-avg').textContent = avg + '%';
-    document.getElementById('stat-best').textContent = best + '%';
-    document.getElementById('stat-passed').textContent = passed;
+    // Quiz stats
+    const quizTotal = quizzes.length;
+    const quizPassed = quizzes.filter(s => s.percentage >= 70).length;
+    const quizAvg = quizTotal > 0 ? Math.round(quizzes.reduce((a, b) => a + b.percentage, 0) / quizTotal) : 0;
+    const quizBest = quizTotal > 0 ? Math.max(...quizzes.map(s => s.percentage)) : 0;
+
+    document.getElementById('stat-quizzes').textContent = quizTotal;
+    document.getElementById('stat-avg').textContent = quizAvg + '%';
+    document.getElementById('stat-best').textContent = quizBest + '%';
+    document.getElementById('stat-passed').textContent = quizPassed;
+
+    // Assessment stats
+    const assessTotal = assessments.length;
+    const assessPassed = assessments.filter(s => s.percentage >= 70).length;
+    const assessAvg = assessTotal > 0 ? Math.round(assessments.reduce((a, b) => a + b.percentage, 0) / assessTotal) : 0;
+    const assessBest = assessTotal > 0 ? Math.max(...assessments.map(s => s.percentage)) : 0;
+
+    document.getElementById('stat-assessments').textContent = assessTotal;
+    document.getElementById('stat-assess-avg').textContent = assessAvg + '%';
+    document.getElementById('stat-assess-best').textContent = assessBest + '%';
+    document.getElementById('stat-assess-passed').textContent = assessPassed;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
