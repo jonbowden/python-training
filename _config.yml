@@ -10,6 +10,7 @@ launch_buttons:
   notebook_interface: "classic"
   binderhub_url: "https://mybinder.org"
   colab_url: "https://colab.research.google.com"
+  thebe: true
 
 repository:
   url: https://github.com/jonbowden/python-training
