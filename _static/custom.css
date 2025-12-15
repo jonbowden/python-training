@@ -3,3 +3,25 @@
     max-width: 150px;
     height: auto;
 }
+
+/* Contact support link in footer */
+.contact-support {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.contact-support a {
+    color: #f8f9fa;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.contact-support a:hover {
+    color: #ffc107;
+    text-decoration: underline;
+}
+
+.contact-support i {
+    margin-right: 0.5rem;
+}

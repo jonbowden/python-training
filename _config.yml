@@ -22,6 +22,12 @@ html:
   use_repository_button: false
   use_issues_button: false
   use_download_button: true
+  extra_footer: |
+    <div class="contact-support">
+      <a href="mailto:codevision@jonbowden.com?subject=CodeVision Support Request">
+        <i class="fas fa-envelope"></i> Report an Issue or Contact Support
+      </a>
+    </div>
 
 sphinx:
   config:
