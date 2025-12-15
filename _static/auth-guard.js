@@ -67,8 +67,10 @@
                 body: JSON.stringify({ action: 'checkAdmin', token: token })
             });
             const result = await response.json();
+            console.log('Admin check result:', result);
             return result.success && result.isAdmin;
-        } catch {
+        } catch (e) {
+            console.error('Admin check error:', e);
             return false;
         }
     }
