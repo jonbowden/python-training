@@ -1,0 +1,338 @@
+?? Module 2 — Quiz Question Bank
+
+Python for Data Work
+
+Instructions to Learners
+
+You will be given 5 questions
+
+3 Multiple Choice
+
+2 Written Response
+
+Answer all questions
+
+This quiz tests understanding of real-world data work, not memorisation
+
+?? MULTIPLE-CHOICE QUESTIONS (MCQ POOL)
+
+(Select ONE correct answer)
+
+MCQ 1
+
+What is the primary purpose of the Pandas library?
+
+A. Building machine learning models
+B. Numerical computing only
+C. Data loading, cleaning, and analysis
+D. Web development
+
+Correct answer: C
+
+MCQ 2
+
+Which Pandas function is most commonly used to load CSV files?
+
+A. pd.open()
+B. pd.read_csv()
+C. pd.load_csv()
+D. pd.import()
+
+Correct answer: B
+
+MCQ 3
+
+Why should you always inspect a dataset before analysing it?
+
+A. To improve performance
+B. To format charts
+C. To understand structure, types, and missing values
+D. To remove duplicates automatically
+
+Correct answer: C
+
+MCQ 4
+
+What does df.info() primarily show?
+
+A. Summary statistics
+B. Column names only
+C. Data types and missing values
+D. Sorted data
+
+Correct answer: C
+
+MCQ 5
+
+Which statement correctly describes a Pandas Series?
+
+A. A two-dimensional table
+B. A single column of data
+C. A database table
+D. A chart
+
+Correct answer: B
+
+MCQ 6
+
+Which operation is best for selecting rows where revenue is greater than 10,000?
+
+A. Sorting
+B. Grouping
+C. Filtering
+D. Profiling
+
+Correct answer: C
+
+MCQ 7
+
+Why is missing data a problem in analysis?
+
+A. It slows down Python
+B. It always causes errors
+C. It can distort results and conclusions
+D. It prevents plotting
+
+Correct answer: C
+
+MCQ 8
+
+Which Pandas function is commonly used to replace missing values?
+
+A. replace()
+B. fillna()
+C. drop()
+D. clean()
+
+Correct answer: B
+
+MCQ 9
+
+What is the result of creating a derived column like this?
+
+df["profit"] = df["revenue"] - df["cost"]
+
+
+A. Filtering data
+B. Aggregating data
+C. Transforming data
+D. Visualising data
+
+Correct answer: C
+
+MCQ 10
+
+What problem does groupby() help solve?
+
+A. Sorting files
+B. Combining multiple datasets
+C. Summarising data by categories
+D. Cleaning missing values
+
+Correct answer: C
+
+MCQ 11
+
+Which library underpins Pandas’ numerical operations?
+
+A. SciPy
+B. Matplotlib
+C. NumPy
+D. Seaborn
+
+Correct answer: C
+
+MCQ 12
+
+What does a Pearson correlation measure?
+
+A. Data size
+B. Data quality
+C. Linear relationship between two variables
+D. Distribution shape
+
+Correct answer: C
+
+MCQ 13
+
+What is the main role of Matplotlib?
+
+A. Statistical testing
+B. Interactive dashboards
+C. Foundational plotting
+D. Database querying
+
+Correct answer: C
+
+MCQ 14
+
+Why might you choose Seaborn over raw Matplotlib?
+
+A. It runs faster
+B. It supports databases
+C. It simplifies statistical visualisation
+D. It replaces Pandas
+
+Correct answer: C
+
+MCQ 15
+
+What advantage does Plotly provide?
+
+A. Faster calculations
+B. Interactive visualisations
+C. Smaller datasets
+D. Automatic cleaning
+
+Correct answer: B
+
+MCQ 16
+
+What does ydata-profiling generate?
+
+A. Machine learning models
+B. Data cleaning scripts
+C. Automated exploratory data analysis reports
+D. SQL queries
+
+Correct answer: C
+
+MCQ 17
+
+Why are APIs useful data sources?
+
+A. They always return clean data
+B. They provide live, programmatic access to data
+C. They replace databases
+D. They improve plotting
+
+Correct answer: B
+
+MCQ 18
+
+Which library is commonly used to retrieve data from APIs?
+
+A. sqlite3
+B. requests
+C. seaborn
+D. scipy
+
+Correct answer: B
+
+MCQ 19
+
+What is SQLite best described as?
+
+A. A cloud database
+B. A distributed database
+C. A lightweight file-based relational database
+D. A NoSQL store
+
+Correct answer: C
+
+MCQ 20
+
+Why is data visualisation important?
+
+A. It reduces file size
+B. It replaces analysis
+C. It helps humans understand patterns and trends
+D. It cleans data automatically
+
+Correct answer: C
+
+?? WRITTEN / SHORT-ANSWER QUESTIONS (POOL)
+
+(Answer in your own words or with code where requested)
+
+WR1
+
+Explain the difference between a Series and a DataFrame.
+
+Expected answer:
+A Series is one-dimensional; a DataFrame is two-dimensional.
+
+WR2
+
+Why is it important to check for missing values before analysis?
+
+Expected answer:
+Missing values can distort calculations and conclusions.
+
+WR3
+
+Write Pandas code to filter rows where revenue is greater than 5,000.
+
+Expected answer:
+
+df[df["revenue"] > 5000]
+
+WR4
+
+Write code to group data by region and calculate total revenue.
+
+Expected answer:
+
+df.groupby("region")["revenue"].sum()
+
+WR5
+
+Explain why derived columns are useful in data analysis.
+
+Expected answer:
+They create new insights from existing data.
+
+WR6
+
+What does df.describe() help you understand?
+
+Expected answer:
+Summary statistics such as mean, min, max, and quartiles.
+
+WR7
+
+Why might interactive charts be preferable to static charts?
+
+Expected answer:
+They allow users to explore data dynamically.
+
+WR8
+
+Give one example of when NumPy is used in data analysis.
+
+Expected answer:
+Calculating averages or numerical statistics.
+
+WR9
+
+What does restarting a notebook kernel not preserve?
+
+Expected answer:
+Variables and in-memory data.
+
+WR10
+
+Why is SQLite useful for learning data analysis?
+
+Expected answer:
+It provides relational querying without server setup.
+
+? Quiz Design Notes (for You)
+
+Total pool: 20 MCQs + 10 Written
+
+Per quiz:
+
+3 MCQs
+
+2 Written
+
+Randomise questions per learner
+
+Suitable for:
+
+HTML rendering
+
+Static site generators
+
+Embedded LMS pages

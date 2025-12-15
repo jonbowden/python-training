@@ -87,11 +87,11 @@
  * @param {Object} e - Form submit event object
  */
 function moveFile(e) {
-  // YOUR FOLDER ID HERE - get from Drive URL
-  var PARENT_FOLDER_ID = '1il2tcPvs2RwMmR8argOyMMimIxfO-aKe';
+  // Module_1 folder ID - files go directly here
+  var MODULE_1_FOLDER_ID = '14F8N8KFYMbtTbHWDWFHshaVdmNyPxKHs';
 
   try {
-    var folder = DriveApp.getFolderById(PARENT_FOLDER_ID);
+    var folder = DriveApp.getFolderById(MODULE_1_FOLDER_ID);
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     var lastRow = sheet.getLastRow();
 

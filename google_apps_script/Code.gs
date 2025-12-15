@@ -84,6 +84,16 @@ function doPost(e) {
 }
 
 function doGet(e) {
+  // Handle GET requests (for CORS-friendly calls)
+  const params = e.parameter;
+
+  if (params.action === 'checkAdmin' && params.token) {
+    const result = checkAdmin(params.token);
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
   return ContentService
     .createTextOutput(JSON.stringify({ status: 'CodeVision API is running' }))
     .setMimeType(ContentService.MimeType.JSON);

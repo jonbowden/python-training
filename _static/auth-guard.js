@@ -61,11 +61,9 @@
 
     async function checkAdminStatus(token) {
         try {
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'checkAdmin', token: token })
-            });
+            // Use GET with URL params to avoid CORS preflight
+            const url = `${API_URL}?action=checkAdmin&token=${encodeURIComponent(token)}`;
+            const response = await fetch(url);
             const result = await response.json();
             console.log('Admin check result:', result);
             return result.success && result.isAdmin;
