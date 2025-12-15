@@ -30,3 +30,4 @@ sphinx:
       - custom.css
     html_js_files:
       - auth-guard.js
+      - notebook-launchers.js
