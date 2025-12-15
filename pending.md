@@ -1,7 +1,8 @@
-# Module 2 Implementation Plan
+# Module 2 Implementation
 
-**Status:** Pending
+**Status:** Complete - Admin-Only Access
 **Created:** 2025-12-15
+**Updated:** 2025-12-15
 
 ---
 
@@ -13,119 +14,169 @@
 
 ---
 
-## Source Files
-
-| File | Purpose |
-|------|---------|
-| `Module2.md` | Content outline (15 sections) |
-| `Module2_Assessment_TEMPLATE_WITH_HIDDEN_TESTS.ipynb` | Grading template with hidden tests |
-| `Module 2 Quiz.txt` | Quiz question bank (20 MCQ + 10 Written) |
-
----
-
-## Files to Create
+## Files Created
 
 | File | Description |
 |------|-------------|
-| `02_data.ipynb` | Main content notebook (expand Module2.md into full tutorial with explanations and examples) |
-| `02_quiz.md` | Quiz page using jupyterquiz (3 MCQ + 2 Written, randomized) |
-| `Module2_Assessment.ipynb` | Student assessment version (stripped of hidden tests and instructor notes) |
-| `02_resources.md` | Additional resources page (optional) |
+| `02_data.ipynb` | Main content notebook (15 sections covering Pandas, NumPy, SciPy, visualization) |
+| `02_quiz.md` | Quiz page with 20 MCQs + 10 written questions (randomized) |
+| `Module2_Assessment.ipynb` | Student assessment (5 tasks, 100 points) |
+| `Module2_Assessment_TEMPLATE_WITH_HIDDEN_TESTS.ipynb` | Grading template with hidden tests |
 
 ---
 
-## Files to Modify
+## Files Modified
 
 | File | Changes |
 |------|---------|
-| `_toc.yml` | Add Module 2 entries (02_data, 02_quiz, Module2_Assessment, 02_resources) |
-| `_static/auth-guard.js` | Add admin-only page protection for Module 2 |
-| `Module2_Assessment_TEMPLATE_WITH_HIDDEN_TESTS.ipynb` | Add scoring infrastructure (`__assessment_scores`, `record_score`) to match grading script |
+| `_toc.yml` | Added Module 2 entries |
+| `_static/auth-guard.js` | Added admin-only page protection |
+| `google_apps_script/Code.gs` | Added GET handler for checkAdmin (CORS fix) |
 
 ---
 
 ## Admin-Only Access Control
 
-Module 2 will be deployed but only accessible to admins until validated.
+Module 2 is deployed but only accessible to admins until validated.
 
-**Implementation:**
-- Add `ADMIN_ONLY_PAGES` list to `auth-guard.js`
-- Check admin status via existing `checkAdmin` API
-- Non-admins redirected to "Coming Soon" or dashboard
-- Admin status already stored in Google Sheet (`is_admin` column)
+**How it works:**
+1. `auth-guard.js` contains `ADMIN_ONLY_PAGES` array listing restricted pages
+2. When user visits a restricted page, JavaScript calls `checkAdmin` API via GET request
+3. API checks `is_admin` column in Users sheet
+4. Non-admins see "Coming Soon" page
 
-**Current Admins:**
+**Protected pages:**
+- `02_data.html`
+- `02_quiz.html`
+- `Module2_Assessment.html`
+- `02_resources.html`
+
+**Current Admins (set in Google Sheet Users tab, `is_admin` column = TRUE):**
 - jontybowden@gmail.com
 - ron.mancillajr@gmail.com
 - mv.njoy@gmail.com
 
-**To Activate for Everyone:**
-Remove Module 2 pages from `ADMIN_ONLY_PAGES` list in `auth-guard.js`
+---
+
+## To Launch Module 2 for Everyone
+
+Edit `_static/auth-guard.js` and empty the `ADMIN_ONLY_PAGES` array:
+
+```javascript
+const ADMIN_ONLY_PAGES = [
+    // Removed - Module 2 now public
+];
+```
+
+Then commit and push:
+```bash
+git add _static/auth-guard.js
+git commit -m "Activate Module 2 for all users"
+git push
+```
 
 ---
 
 ## Google Components
 
-### Google Form
-- Create new submission form for Module 2 assessments
-- Fields: Email (verified), Module selection, File upload
-- Link to include in `Module2_Assessment.ipynb`
+### Google Form (Module 2 Submissions)
+- **Form URL:** https://docs.google.com/forms/d/e/1FAIpQLSd27i40HquHx5xI6IX_mMrNq63FX8THgdg38a9EFjvIJMls-Q/viewform
+- **Fields:** Timestamp, Email Address, Upload notebook (.ipynb)
 
 ### Google Drive
-- Ensure `Module_2` folder exists under parent folder (`1il2tcPvs2RwMmR8argOyMMimIxfO-aKe`)
-- Apps Script `moveFileToModule()` already supports multi-module routing
+- **Module_2 Folder ID:** `1iI-zw17lQWMBkNlJ8WDlXVPuez8dTa_x`
+- Apps Script moves uploaded files to this folder
 
-### Apps Script
-- Existing `moveFileToModule()` function handles multiple modules
-- May need to update form trigger to use this function instead of `moveFile()`
+### Apps Script (Form Handler)
+Add to the Module 2 form's script editor:
+
+```javascript
+function moveFile(e) {
+  var MODULE_2_FOLDER_ID = '1iI-zw17lQWMBkNlJ8WDlXVPuez8dTa_x';
+
+  var responses = e.namedValues;
+  var fileUrl = responses['Upload your completed notebook (.ipynb)'][0];
+
+  if (fileUrl) {
+    var fileIdMatch = fileUrl.match(/id=([^&]+)/);
+    if (fileIdMatch) {
+      var fileId = fileIdMatch[1];
+      var file = DriveApp.getFileById(fileId);
+      var targetFolder = DriveApp.getFolderById(MODULE_2_FOLDER_ID);
+      file.moveTo(targetFolder);
+    }
+  }
+}
+```
+
+Set trigger: On form submit → Run `moveFile`
 
 ---
 
-## GitHub Actions
+## Grading
 
-The grading workflow (`grade-assessments.yml`) already supports multiple modules:
-
+Run grading for Module 2:
 ```bash
 python scripts/grade_assessments.py --module 2
 ```
 
-**Requirements:**
-- Template file must be named: `Module2_Assessment_TEMPLATE_WITH_HIDDEN_TESTS.ipynb`
-- Template must include scoring infrastructure matching `grade_assessments.py`
+Or trigger from dashboard (admin only) with module=2.
 
 ---
 
-## Data Files for Assessment
+## Assessment Tasks (5 Tasks, 100 Points)
 
-The Module 2 assessment uses financial datasets:
-
-| Dataset | Description |
-|---------|-------------|
-| DJIA | Dow Jones Industrial Average historical data |
-| FX (USD/GBP) | Foreign exchange rate data |
-| FEDFUNDS | Federal Reserve interest rates |
-
-**Options:**
-1. Include sample CSV files in repository
-2. Use public APIs (FRED, Yahoo Finance) - students fetch live data
-3. Provide URLs to hosted datasets
+| Task | Points | Description |
+|------|--------|-------------|
+| 1 | 20 | Load & Inspect DJIA data |
+| 2 | 20 | Cleaning & Feature Engineering (Daily_Return) |
+| 3 | 20 | Visual Analysis (time-series, histogram) |
+| 4 | 20 | Multi-Dataset Analysis (FX data, alignment) |
+| 5 | 20 | Macro Insight (FEDFUNDS, written analysis) |
 
 ---
 
 ## Task Checklist
 
-- [ ] 1. Update `auth-guard.js` with admin-only page protection
-- [ ] 2. Create `02_data.ipynb` (main content notebook)
-- [ ] 3. Create `02_quiz.md` (quiz page)
-- [ ] 4. Create `Module2_Assessment.ipynb` (student version)
-- [ ] 5. Update grading template with scoring infrastructure
-- [ ] 6. Update `_toc.yml` with Module 2 entries
-- [ ] 7. Create Google Form for Module 2 submissions (manual)
-- [ ] 8. Ensure `Module_2` folder exists in Google Drive (manual)
-- [ ] 9. Update Apps Script trigger if needed (manual)
-- [ ] 10. Test grading workflow with `--module 2`
-- [ ] 11. Deploy and test as admin
+- [x] 1. Update `auth-guard.js` with admin-only page protection
+- [x] 2. Create `02_data.ipynb` (main content notebook)
+- [x] 3. Create `02_quiz.md` (quiz page)
+- [x] 4. Create `Module2_Assessment.ipynb` (student version)
+- [x] 5. Update grading template with scoring infrastructure
+- [x] 6. Update `_toc.yml` with Module 2 entries
+- [x] 7. Create Google Form for Module 2 submissions
+- [x] 8. Create `Module_2` folder in Google Drive
+- [x] 9. Add Apps Script trigger for file moving
+- [x] 10. Fix CORS issue with checkAdmin API (use GET instead of POST)
+- [x] 11. Deploy and test as admin
 - [ ] 12. **LAUNCH:** Remove from admin-only list when validated
+
+---
+
+## Technical Notes
+
+### CORS Fix for Admin Check
+The original POST request to Apps Script triggered CORS preflight errors. Fixed by:
+1. Changed `auth-guard.js` to use GET request with URL parameters
+2. Updated `Code.gs` doGet() to handle `checkAdmin` action
+
+### Apps Script doGet Handler
+```javascript
+function doGet(e) {
+  const params = e.parameter;
+
+  if (params.action === 'checkAdmin' && params.token) {
+    const result = checkAdmin(params.token);
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'CodeVision API is running' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+```
 
 ---
 
@@ -146,24 +197,3 @@ The Module 2 assessment uses financial datasets:
 13. Interactive Charts with Plotly
 14. Automated Data Profiling
 15. Data from APIs and Databases
-
----
-
-## Assessment Tasks (5 Tasks, 100 Points)
-
-| Task | Points | Description |
-|------|--------|-------------|
-| 1 | 20 | Load & Inspect DJIA data |
-| 2 | 20 | Cleaning & Feature Engineering (Daily_Return) |
-| 3 | 20 | Visual Analysis (time-series, histogram) |
-| 4 | 20 | Multi-Dataset Analysis (FX data, alignment) |
-| 5 | 20 | Macro Insight (FEDFUNDS, written analysis) |
-
----
-
-## Notes
-
-- Quiz format: 3 MCQ + 2 Written (randomized from pool)
-- Assessment emphasizes financial services context
-- Grading uses AST syntax validation before execution
-- Dashboard will show Module 2 progress once activated
