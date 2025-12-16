@@ -1,7 +1,7 @@
-# Module 2 — Python for Data Work
+# Module 2 ï¿½ Python for Data Work
 
 **Duration:** 12 hours  
-**Goal:** Build confidence working with real-world datasets — loading, cleaning, transforming, analysing, and visualising data using Python.
+**Goal:** Build confidence working with real-world datasets ï¿½ loading, cleaning, transforming, analysing, and visualising data using Python.
 
 In Module 1, you learned how Python works.  
 In Module 2, Python starts to feel useful.
@@ -10,7 +10,7 @@ Real data is rarely neat. It arrives incomplete, inconsistent, and spread across
 
 ---
 
-## Section 2.1 — What Is Pandas and Why We Use It
+## Section 2.1 ï¿½ What Is Pandas and Why We Use It
 
 Pandas is the most widely used Python library for data analysis. It provides powerful, high-level abstractions for working with tabular data.
 
@@ -20,7 +20,7 @@ import pandas as pd
 
 ---
 
-## Section 2.2 — Loading Data from Files
+## Section 2.2 ï¿½ Loading Data from Files
 
 ```python
 df = pd.read_csv("sales.csv")
@@ -29,7 +29,7 @@ df_excel = pd.read_excel("sales.xlsx")
 
 ---
 
-## Section 2.3 — First Look at a Dataset
+## Section 2.3 ï¿½ First Look at a Dataset
 
 ```python
 df.head()
@@ -39,7 +39,7 @@ df.describe()
 
 ---
 
-## Section 2.4 — DataFrames and Series
+## Section 2.4 ï¿½ DataFrames and Series
 
 ```python
 df["revenue"]
@@ -48,7 +48,7 @@ df[["revenue"]]
 
 ---
 
-## Section 2.5 — Filtering Data
+## Section 2.5 ï¿½ Filtering Data
 
 ```python
 df[df["revenue"] > 10000]
@@ -56,7 +56,7 @@ df[df["revenue"] > 10000]
 
 ---
 
-## Section 2.6 — Handling Missing Data
+## Section 2.6 ï¿½ Handling Missing Data
 
 ```python
 df.isna().sum()
@@ -65,7 +65,7 @@ df.fillna(0)
 
 ---
 
-## Section 2.7 — Transforming Data
+## Section 2.7 ï¿½ Transforming Data
 
 ```python
 df["profit"] = df["revenue"] - df["cost"]
@@ -73,7 +73,7 @@ df["profit"] = df["revenue"] - df["cost"]
 
 ---
 
-## Section 2.8 — Grouping and Aggregation
+## Section 2.8 ï¿½ Grouping and Aggregation
 
 ```python
 df.groupby("region")["revenue"].sum()
@@ -81,7 +81,7 @@ df.groupby("region")["revenue"].sum()
 
 ---
 
-## Section 2.9 — NumPy for Numerical Work
+## Section 2.9 ï¿½ NumPy for Numerical Work
 
 ```python
 import numpy as np
@@ -90,7 +90,7 @@ np.mean(df["revenue"])
 
 ---
 
-## Section 2.10 — Statistics with SciPy
+## Section 2.10 ï¿½ Statistics with SciPy
 
 ```python
 from scipy import stats
@@ -99,7 +99,7 @@ stats.pearsonr(df["revenue"], df["cost"])
 
 ---
 
-## Section 2.11 — Visualisation with Matplotlib
+## Section 2.11 ï¿½ Visualisation with Matplotlib
 
 ```python
 import matplotlib.pyplot as plt
@@ -109,7 +109,7 @@ plt.show()
 
 ---
 
-## Section 2.12 — Visualisation with Seaborn
+## Section 2.12 ï¿½ Visualisation with Seaborn
 
 ```python
 import seaborn as sns
@@ -118,7 +118,7 @@ sns.histplot(df["revenue"])
 
 ---
 
-## Section 2.13 — Interactive Charts with Plotly
+## Section 2.13 ï¿½ Interactive Charts with Plotly
 
 ```python
 import plotly.express as px
@@ -127,7 +127,7 @@ px.bar(df, x="region", y="revenue").show()
 
 ---
 
-## Section 2.14 — Automated Data Profiling
+## Section 2.14 ï¿½ Automated Data Profiling
 
 ```python
 from ydata_profiling import ProfileReport
@@ -136,7 +136,7 @@ ProfileReport(df)
 
 ---
 
-## Section 2.15 — Data from APIs and Databases
+## Section 2.15 ï¿½ Data from APIs and Databases
 
 ```python
 import requests
@@ -145,6 +145,43 @@ import sqlite3
 
 ---
 
+## Section 2.16 â€” Acquiring Real Financial Data
+
+A critical skill for any data professional is knowing where to find authoritative data sources and how to download and load them.
+
+### Key Data Sources for Financial Analysis
+
+**Market Data:**
+- Wall Street Journal: https://www.wsj.com/market-data/
+- Yahoo Finance: https://finance.yahoo.com/
+
+**Economic Data:**
+- Federal Reserve Economic Data (FRED): https://fred.stlouisfed.org/
+- Bank of England: https://www.bankofengland.co.uk/statistics
+
+**Loading FRED Data:**
+```python
+# FRED CSVs use "." for missing values
+df = pd.read_csv('fred_data.csv', parse_dates=['DATE'], na_values=['.'])
+df = df.rename(columns={'DATE': 'Date', 'SERIES_CODE': 'Value'})
+```
+
+---
+
+## Module 2 Assessment
+
+The assessment requires you to download **real financial data** from authoritative sources:
+
+1. **DJIA Index** from Wall Street Journal (or Yahoo Finance)
+2. **USD/GBP Exchange Rate** from FRED (series: DEXUSUK)
+3. **Federal Funds Rate** from FRED (series: FEDFUNDS)
+
+This is a crucial part of the learning â€” working with real data teaches you to handle real-world data quirks like missing values, different date formats, and varying column naming conventions.
+
+**Assessment Notebook:** `Module2_Assessment.ipynb`
+
+---
+
 ## End of Module 2
 
-You can now load, clean, analyse, and visualise real-world data using Python.
+You can now load, clean, analyse, and visualise real-world data using Python â€” including sourcing data from professional financial databases.
