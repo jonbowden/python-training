@@ -30,7 +30,12 @@ import io
 
 # Configuration
 DRIVE_FOLDER_ID = '1il2tcPvs2RwMmR8argOyMMimIxfO-aKe'
-RESPONSE_SPREADSHEET_ID = '1drrRJD40RDgcUlCweAh0ijlfircIQbzCagsoYeWqsxQ'
+
+# Response spreadsheet IDs per module
+RESPONSE_SPREADSHEET_IDS = {
+    1: '1drrRJD40RDgcUlCweAh0ijlfircIQbzCagsoYeWqsxQ',
+    2: '1RZfHeZPOJSjepquHOt1xHFBqTXvALczlIDcZzDVIWtI',
+}
 SCOPES = [
     'https://www.googleapis.com/auth/drive.readonly',
     'https://www.googleapis.com/auth/spreadsheets'  # Write access to mark graded
@@ -58,14 +63,14 @@ def authenticate_google():
     return drive, sheets
 
 
-def get_dashboard_email_mapping(sheets) -> dict:
+def get_dashboard_email_mapping(sheets, spreadsheet_id: str) -> dict:
     """
     Read EmailMappings sheet to map Google emails to dashboard emails.
     Returns dict of {google_email: dashboard_email}
     """
     try:
         result = sheets.spreadsheets().values().get(
-            spreadsheetId=RESPONSE_SPREADSHEET_ID,
+            spreadsheetId=spreadsheet_id,
             range='EmailMappings!A:B'
         ).execute()
 
@@ -101,18 +106,18 @@ def parse_timestamp(ts_str: str):
             return None
 
 
-def get_submissions_from_sheet(sheets) -> tuple[list[dict], dict, int]:
+def get_submissions_from_sheet(sheets, spreadsheet_id: str) -> tuple[list[dict], dict, int]:
     """
     Read the form response spreadsheet to get submissions needing grading.
     Returns tuple of (submissions_list, dashboard_mapping, graded_col_index)
 
     Each submission dict contains: email, file_id, row_number, graded, timestamp
     """
-    dashboard_mapping = get_dashboard_email_mapping(sheets)
+    dashboard_mapping = get_dashboard_email_mapping(sheets, spreadsheet_id)
 
     try:
         result = sheets.spreadsheets().values().get(
-            spreadsheetId=RESPONSE_SPREADSHEET_ID,
+            spreadsheetId=spreadsheet_id,
             range='A:Z'  # Get all columns from first sheet
         ).execute()
 
@@ -183,7 +188,7 @@ def get_submissions_from_sheet(sheets) -> tuple[list[dict], dict, int]:
         return [], dashboard_mapping, -1
 
 
-def mark_as_graded(sheets, row_number: int, graded_col: int):
+def mark_as_graded(sheets, spreadsheet_id: str, row_number: int, graded_col: int):
     """Mark a submission row as graded in the spreadsheet."""
     try:
         # Convert to A1 notation (columns are 0-indexed, so col 5 = F)
@@ -191,7 +196,7 @@ def mark_as_graded(sheets, row_number: int, graded_col: int):
         cell_range = f'{col_letter}{row_number}'
 
         sheets.spreadsheets().values().update(
-            spreadsheetId=RESPONSE_SPREADSHEET_ID,
+            spreadsheetId=spreadsheet_id,
             range=cell_range,
             valueInputOption='RAW',
             body={'values': [['TRUE']]}
@@ -556,6 +561,14 @@ def main():
         sys.exit(1)
 
     print(f"Template: {template_path}")
+
+    # Get spreadsheet ID for this module
+    spreadsheet_id = RESPONSE_SPREADSHEET_IDS.get(module)
+    if not spreadsheet_id:
+        print(f"ERROR: No response spreadsheet configured for Module {module}")
+        sys.exit(1)
+
+    print(f"Response spreadsheet: {spreadsheet_id}")
     print()
 
     # Authenticate with Google APIs
@@ -564,7 +577,7 @@ def main():
 
     # Load submissions from response spreadsheet
     print("Loading submissions from response spreadsheet...")
-    sheet_submissions, dashboard_mapping, graded_col = get_submissions_from_sheet(sheets)
+    sheet_submissions, dashboard_mapping, graded_col = get_submissions_from_sheet(sheets, spreadsheet_id)
 
     if not sheet_submissions:
         print("No submissions found in spreadsheet.")
@@ -612,7 +625,7 @@ def main():
 
         # Mark as graded in spreadsheet if successful
         if result['status'] in ('graded', 'syntax_error', 'empty'):
-            mark_as_graded(sheets, row_number, graded_col)
+            mark_as_graded(sheets, spreadsheet_id, row_number, graded_col)
 
         # Print result summary
         status = result['status']
