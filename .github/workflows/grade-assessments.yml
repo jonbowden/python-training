@@ -1,15 +1,20 @@
 name: Grade Assessments
 
 on:
+  # Run every 30 minutes to pick up new submissions
+  schedule:
+    - cron: '*/30 * * * *'
+
+  # Also allow manual trigger
   workflow_dispatch:
     inputs:
       module:
-        description: 'Module number (1, 2, etc.)'
-        required: true
+        description: 'Module number (1, 2, etc.) - leave empty to grade all'
+        required: false
         type: string
-        default: '1'
+        default: ''
       student_email:
-        description: 'Specific student email (optional - grades all if empty)'
+        description: 'Specific student email (optional)'
         required: false
         type: string
 
@@ -28,12 +33,24 @@ jobs:
       - name: Install dependencies
         run: pip install -r scripts/requirements-grading.txt
 
-      - name: Run grading
+      - name: Grade Module 1
+        if: ${{ inputs.module == '' || inputs.module == '1' }}
         env:
           GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
           APPS_SCRIPT_URL: ${{ secrets.APPS_SCRIPT_URL }}
           ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
         run: |
           python scripts/grade_assessments.py \
-            --module ${{ inputs.module }} \
+            --module 1 \
+            --student "${{ inputs.student_email }}"
+
+      - name: Grade Module 2
+        if: ${{ inputs.module == '' || inputs.module == '2' }}
+        env:
+          GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+          APPS_SCRIPT_URL: ${{ secrets.APPS_SCRIPT_URL }}
+          ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
+        run: |
+          python scripts/grade_assessments.py \
+            --module 2 \
             --student "${{ inputs.student_email }}"
