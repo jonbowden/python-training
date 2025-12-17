@@ -182,6 +182,16 @@ This is a crucial part of the learning — working with real data teaches you to
 
 ---
 
+## Additional Resources
+
+**Book:**
+- [Python for Data Analysis](https://pythoncourses.azurewebsites.net/eBooks/Python%20for%20Data%20Analysis(2).pdf) — Comprehensive guide to data wrangling with pandas and NumPy
+
+**Video:**
+- [Python for Data Analysis Tutorial](https://www.youtube.com/watch?v=mkYBJwX_dMs) — Video walkthrough of key data analysis concepts
+
+---
+
 ## End of Module 2
 
 You can now load, clean, analyse, and visualise real-world data using Python — including sourcing data from professional financial databases.
