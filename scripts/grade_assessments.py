@@ -376,7 +376,7 @@ def submit_score(email: str, module_id: str, score: int, max_score: int, details
         return False
 
 
-def grade_submission(drive, submission: dict, module: int, template_path: str, email_mapping: dict) -> dict:
+def grade_submission(drive, submission: dict, module: int, template_path: str, email_mapping: dict, force: bool = False) -> dict:
     """Grade a single submission and return results."""
     filename = submission['name']
     file_id = submission['id']
@@ -402,8 +402,8 @@ def grade_submission(drive, submission: dict, module: int, template_path: str, e
 
     result['email'] = email
 
-    # Check if already graded
-    if check_already_graded(email, module_id):
+    # Check if already graded (skip check if force=True)
+    if not force and check_already_graded(email, module_id):
         result['status'] = 'skipped'
         result['details'] = {'reason': 'Already graded'}
         return result
@@ -475,15 +475,19 @@ def main():
     parser = argparse.ArgumentParser(description='Grade student assessment submissions')
     parser.add_argument('--module', type=int, required=True, help='Module number (1, 2, etc.)')
     parser.add_argument('--student', type=str, default='', help='Specific student email (optional)')
+    parser.add_argument('--force', action='store_true', help='Re-grade even if already graded')
     args = parser.parse_args()
 
     module = args.module
     student_filter = args.student.strip().lower() if args.student else None
+    force_regrade = args.force
 
     print(f"=== CodeVision Assessment Grading ===")
     print(f"Module: {module}")
     if student_filter:
         print(f"Student filter: {student_filter}")
+    if force_regrade:
+        print(f"Force re-grade: ENABLED")
     print()
 
     # Find template
@@ -531,7 +535,7 @@ def main():
                 continue
 
         print(f"Processing: {filename}")
-        result = grade_submission(drive, submission, module, str(template_path), email_mapping)
+        result = grade_submission(drive, submission, module, str(template_path), email_mapping, force=force_regrade)
         results.append(result)
 
         # Print result summary
