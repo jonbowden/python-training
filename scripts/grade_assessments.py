@@ -87,12 +87,26 @@ def get_dashboard_email_mapping(sheets) -> dict:
         return {}
 
 
+def parse_timestamp(ts_str: str):
+    """Parse Google Forms timestamp string to datetime."""
+    from datetime import datetime
+    # Google Forms format: "12/17/2025 12:45:37" (M/D/YYYY H:MM:SS)
+    try:
+        return datetime.strptime(ts_str.strip(), "%m/%d/%Y %H:%M:%S")
+    except ValueError:
+        try:
+            # Try alternative format
+            return datetime.strptime(ts_str.strip(), "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            return None
+
+
 def get_submissions_from_sheet(sheets) -> tuple[list[dict], dict, int]:
     """
     Read the form response spreadsheet to get submissions needing grading.
     Returns tuple of (submissions_list, dashboard_mapping, graded_col_index)
 
-    Each submission dict contains: email, file_id, row_number, graded
+    Each submission dict contains: email, file_id, row_number, graded, timestamp
     """
     dashboard_mapping = get_dashboard_email_mapping(sheets)
 
@@ -109,17 +123,24 @@ def get_submissions_from_sheet(sheets) -> tuple[list[dict], dict, int]:
 
         # Find column indices (header row)
         headers = [h.lower().strip() for h in rows[0]]
+        timestamp_col = None
         email_col = None
         file_col = None
         graded_col = None
 
         for i, h in enumerate(headers):
+            if 'timestamp' in h:
+                timestamp_col = i
             if 'email' in h:
                 email_col = i
             if 'notebook' in h or 'file' in h or 'upload' in h:
                 file_col = i
             if 'graded' in h:
                 graded_col = i
+
+        # Timestamp is usually column A (index 0) in Google Forms
+        if timestamp_col is None:
+            timestamp_col = 0
 
         if email_col is None or file_col is None:
             print(f"Warning: Could not find email or file columns. Headers: {headers}")
@@ -134,6 +155,8 @@ def get_submissions_from_sheet(sheets) -> tuple[list[dict], dict, int]:
         submissions = []
         for row_idx, row in enumerate(rows[1:], start=2):  # Start at 2 (1-indexed, skip header)
             if len(row) > max(email_col, file_col):
+                timestamp_str = row[timestamp_col] if len(row) > timestamp_col else ''
+                timestamp = parse_timestamp(timestamp_str)
                 email = row[email_col].strip().lower() if row[email_col] else None
                 file_url = row[file_col] if len(row) > file_col else None
                 graded = row[graded_col].strip().upper() if len(row) > graded_col and row[graded_col] else ''
@@ -148,7 +171,8 @@ def get_submissions_from_sheet(sheets) -> tuple[list[dict], dict, int]:
                             'email': final_email,
                             'file_id': file_id_match.group(0),
                             'row_number': row_idx,
-                            'graded': graded == 'TRUE'
+                            'graded': graded == 'TRUE',
+                            'timestamp': timestamp
                         })
 
         print(f"Loaded {len(submissions)} submissions from response sheet")
@@ -549,11 +573,17 @@ def main():
     # Build email mapping for grade_submission function
     email_mapping = {s['file_id']: s['email'] for s in sheet_submissions}
 
-    # Group by email and keep only the latest (highest row number = most recent)
+    # Group by email and keep only the latest (by timestamp)
     latest_by_email = {}
     for sub in sheet_submissions:
         email = sub['email']
-        if email not in latest_by_email or sub['row_number'] > latest_by_email[email]['row_number']:
+        if email not in latest_by_email:
+            latest_by_email[email] = sub
+        elif sub['timestamp'] and latest_by_email[email]['timestamp']:
+            if sub['timestamp'] > latest_by_email[email]['timestamp']:
+                latest_by_email[email] = sub
+        elif sub['timestamp']:
+            # This one has timestamp, existing doesn't - prefer this one
             latest_by_email[email] = sub
 
     # Filter to ungraded submissions (unless --force)
