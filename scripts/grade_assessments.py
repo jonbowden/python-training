@@ -33,7 +33,7 @@ DRIVE_FOLDER_ID = '1il2tcPvs2RwMmR8argOyMMimIxfO-aKe'
 RESPONSE_SPREADSHEET_ID = '1drrRJD40RDgcUlCweAh0ijlfircIQbzCagsoYeWqsxQ'
 SCOPES = [
     'https://www.googleapis.com/auth/drive.readonly',
-    'https://www.googleapis.com/auth/spreadsheets.readonly'
+    'https://www.googleapis.com/auth/spreadsheets'  # Write access to mark graded
 ]
 
 
@@ -87,10 +87,12 @@ def get_dashboard_email_mapping(sheets) -> dict:
         return {}
 
 
-def get_email_mapping(sheets) -> tuple[dict, dict]:
+def get_submissions_from_sheet(sheets) -> tuple[list[dict], dict, int]:
     """
-    Read the form response spreadsheet to get email -> file URL mapping.
-    Returns tuple of (file_id_to_email, google_to_dashboard_email)
+    Read the form response spreadsheet to get submissions needing grading.
+    Returns tuple of (submissions_list, dashboard_mapping, graded_col_index)
+
+    Each submission dict contains: email, file_id, row_number, graded
     """
     dashboard_mapping = get_dashboard_email_mapping(sheets)
 
@@ -103,29 +105,38 @@ def get_email_mapping(sheets) -> tuple[dict, dict]:
         rows = result.get('values', [])
         if not rows:
             print("Warning: Response spreadsheet is empty")
-            return {}, dashboard_mapping
+            return [], dashboard_mapping, -1
 
         # Find column indices (header row)
         headers = [h.lower().strip() for h in rows[0]]
         email_col = None
         file_col = None
+        graded_col = None
 
         for i, h in enumerate(headers):
             if 'email' in h:
                 email_col = i
             if 'notebook' in h or 'file' in h or 'upload' in h:
                 file_col = i
+            if 'graded' in h:
+                graded_col = i
 
         if email_col is None or file_col is None:
             print(f"Warning: Could not find email or file columns. Headers: {headers}")
-            return {}, dashboard_mapping
+            return [], dashboard_mapping, -1
 
-        # Build mapping
-        mapping = {}
-        for row in rows[1:]:  # Skip header
+        # If no Graded column exists, we'll need to add it
+        if graded_col is None:
+            graded_col = len(headers)
+            print(f"Note: 'Graded' column not found. Will use column {graded_col + 1} (add 'Graded' header)")
+
+        # Build submissions list
+        submissions = []
+        for row_idx, row in enumerate(rows[1:], start=2):  # Start at 2 (1-indexed, skip header)
             if len(row) > max(email_col, file_col):
                 email = row[email_col].strip().lower() if row[email_col] else None
                 file_url = row[file_col] if len(row) > file_col else None
+                graded = row[graded_col].strip().upper() if len(row) > graded_col and row[graded_col] else ''
 
                 if email and file_url:
                     # Extract file ID from Drive URL
@@ -133,14 +144,36 @@ def get_email_mapping(sheets) -> tuple[dict, dict]:
                     if file_id_match:
                         # Apply dashboard email mapping if exists
                         final_email = dashboard_mapping.get(email, email)
-                        mapping[file_id_match.group(0)] = final_email
+                        submissions.append({
+                            'email': final_email,
+                            'file_id': file_id_match.group(0),
+                            'row_number': row_idx,
+                            'graded': graded == 'TRUE'
+                        })
 
-        print(f"Loaded {len(mapping)} email mappings from response sheet")
-        return mapping, dashboard_mapping
+        print(f"Loaded {len(submissions)} submissions from response sheet")
+        return submissions, dashboard_mapping, graded_col
 
     except Exception as e:
         print(f"Warning: Could not read response spreadsheet: {e}")
-        return {}, dashboard_mapping
+        return [], dashboard_mapping, -1
+
+
+def mark_as_graded(sheets, row_number: int, graded_col: int):
+    """Mark a submission row as graded in the spreadsheet."""
+    try:
+        # Convert to A1 notation (columns are 0-indexed, so col 5 = F)
+        col_letter = chr(ord('A') + graded_col)
+        cell_range = f'{col_letter}{row_number}'
+
+        sheets.spreadsheets().values().update(
+            spreadsheetId=RESPONSE_SPREADSHEET_ID,
+            range=cell_range,
+            valueInputOption='RAW',
+            body={'values': [['TRUE']]}
+        ).execute()
+    except Exception as e:
+        print(f"  Warning: Could not mark row {row_number} as graded: {e}")
 
 
 def list_submissions(drive, module: int) -> list[dict]:
@@ -475,7 +508,7 @@ def main():
     parser = argparse.ArgumentParser(description='Grade student assessment submissions')
     parser.add_argument('--module', type=int, required=True, help='Module number (1, 2, etc.)')
     parser.add_argument('--student', type=str, default='', help='Specific student email (optional)')
-    parser.add_argument('--force', action='store_true', help='Re-grade even if already graded')
+    parser.add_argument('--force', action='store_true', help='Re-grade even if already graded (ignores Graded column)')
     args = parser.parse_args()
 
     module = args.module
@@ -487,7 +520,7 @@ def main():
     if student_filter:
         print(f"Student filter: {student_filter}")
     if force_regrade:
-        print(f"Force re-grade: ENABLED")
+        print(f"Force re-grade: ENABLED (ignoring Graded column)")
     print()
 
     # Find template
@@ -505,54 +538,63 @@ def main():
     print("Authenticating with Google...")
     drive, sheets = authenticate_google()
 
-    # Load email mapping from response spreadsheet
-    print("Loading email mappings from response spreadsheet...")
-    email_mapping, _ = get_email_mapping(sheets)
+    # Load submissions from response spreadsheet
+    print("Loading submissions from response spreadsheet...")
+    sheet_submissions, dashboard_mapping, graded_col = get_submissions_from_sheet(sheets)
 
-    # List submissions
-    print(f"Listing submissions for Module {module}...")
-    submissions = list_submissions(drive, module)
-
-    if not submissions:
-        print("No submissions found.")
+    if not sheet_submissions:
+        print("No submissions found in spreadsheet.")
         return
 
-    print(f"Found {len(submissions)} submission(s)")
-    print()
+    # Build email mapping for grade_submission function
+    email_mapping = {s['file_id']: s['email'] for s in sheet_submissions}
 
-    # Group submissions by email and keep only the latest per student
-    # (submissions are already ordered by createdTime desc from list_submissions)
+    # Group by email and keep only the latest (highest row number = most recent)
     latest_by_email = {}
-    for submission in submissions:
-        file_id = submission['id']
-        filename = submission['name']
-        email = email_mapping.get(file_id) or extract_email_from_filename(filename)
+    for sub in sheet_submissions:
+        email = sub['email']
+        if email not in latest_by_email or sub['row_number'] > latest_by_email[email]['row_number']:
+            latest_by_email[email] = sub
 
-        if email and email not in latest_by_email:
-            latest_by_email[email] = submission
+    # Filter to ungraded submissions (unless --force)
+    submissions_to_grade = []
+    skipped_graded = 0
+    for email, sub in latest_by_email.items():
+        if student_filter and student_filter not in email:
+            continue
+        if sub['graded'] and not force_regrade:
+            skipped_graded += 1
+            continue
+        submissions_to_grade.append(sub)
 
-    # Filter to only latest submissions
-    submissions_to_grade = list(latest_by_email.values())
-    print(f"Processing {len(submissions_to_grade)} unique student(s) (latest submission each)")
+    print(f"Found {len(latest_by_email)} unique student(s)")
+    if skipped_graded > 0:
+        print(f"Skipping {skipped_graded} already graded (use --force to re-grade)")
+    print(f"Will grade {len(submissions_to_grade)} submission(s)")
     print()
+
+    if not submissions_to_grade:
+        print("Nothing to grade.")
+        return
 
     # Grade each submission
     results = []
-    for submission in submissions_to_grade:
-        filename = submission['name']
-        file_id = submission['id']
+    for sub in submissions_to_grade:
+        email = sub['email']
+        file_id = sub['file_id']
+        row_number = sub['row_number']
 
-        # Get email from mapping or filename
-        email = email_mapping.get(file_id) or extract_email_from_filename(filename)
+        # Create a submission dict compatible with grade_submission
+        submission = {'id': file_id, 'name': f'{email}_submission'}
 
-        # Apply student filter if provided
-        if student_filter:
-            if not email or student_filter not in email:
-                continue
-
-        print(f"Processing: {filename}")
-        result = grade_submission(drive, submission, module, str(template_path), email_mapping, force=force_regrade)
+        print(f"Processing: {email} (row {row_number})")
+        result = grade_submission(drive, submission, module, str(template_path), email_mapping, force=True)
+        result['row_number'] = row_number
         results.append(result)
+
+        # Mark as graded in spreadsheet if successful
+        if result['status'] in ('graded', 'syntax_error', 'empty'):
+            mark_as_graded(sheets, row_number, graded_col)
 
         # Print result summary
         status = result['status']
