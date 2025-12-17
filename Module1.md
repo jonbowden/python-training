@@ -256,3 +256,18 @@ A virtual environment is an isolated folder for a project's dependencies. It pre
   * **Activation:**
       * Mac/Linux: `source venv/bin/activate`
       * Windows: `venv\Scripts\activate`
+
+---
+
+## Module 1 Additional Resources
+
+**Videos:**
+- [Python Tutorial for Beginners](https://www.youtube.com/watch?v=Gx5qb1uHss4) — Comprehensive introduction to Python programming
+- [Python Full Course](https://www.youtube.com/watch?v=FXKMmilL70w) — Complete Python course from basics to advanced
+- [Google Colab Introduction](https://www.youtube.com/watch?v=PytsxNfR8GI) — Getting started with Google Colab for Python
+
+---
+
+## End of Module 1
+
+You now have a solid foundation in Python syntax, data types, control flow, and file handling.
