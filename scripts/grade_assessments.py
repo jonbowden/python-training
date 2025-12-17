@@ -573,23 +573,11 @@ def main():
     # Build email mapping for grade_submission function
     email_mapping = {s['file_id']: s['email'] for s in sheet_submissions}
 
-    # Group by email and keep only the latest (by timestamp)
-    latest_by_email = {}
-    for sub in sheet_submissions:
-        email = sub['email']
-        if email not in latest_by_email:
-            latest_by_email[email] = sub
-        elif sub['timestamp'] and latest_by_email[email]['timestamp']:
-            if sub['timestamp'] > latest_by_email[email]['timestamp']:
-                latest_by_email[email] = sub
-        elif sub['timestamp']:
-            # This one has timestamp, existing doesn't - prefer this one
-            latest_by_email[email] = sub
-
     # Filter to ungraded submissions (unless --force)
     submissions_to_grade = []
     skipped_graded = 0
-    for email, sub in latest_by_email.items():
+    for sub in sheet_submissions:
+        email = sub['email']
         if student_filter and student_filter not in email:
             continue
         if sub['graded'] and not force_regrade:
@@ -597,10 +585,10 @@ def main():
             continue
         submissions_to_grade.append(sub)
 
-    print(f"Found {len(latest_by_email)} unique student(s)")
+    print(f"Total submissions: {len(sheet_submissions)}")
     if skipped_graded > 0:
-        print(f"Skipping {skipped_graded} already graded (use --force to re-grade)")
-    print(f"Will grade {len(submissions_to_grade)} submission(s)")
+        print(f"Already graded: {skipped_graded}")
+    print(f"To grade: {len(submissions_to_grade)}")
     print()
 
     if not submissions_to_grade:
