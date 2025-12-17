@@ -10,17 +10,35 @@ Jupyter Book-based Python training course with:
 ## Project Structure
 ```
 ├── _config.yml              # Jupyter Book configuration
-├── _toc.yml                 # Table of contents
+├── _toc.yml                 # Table of contents (defines chapter order)
 ├── intro.md                 # Landing page
 ├── login.md                 # Authentication page
 ├── dashboard.md             # User dashboard
+│
+├── # Module 1: Python Foundations
 ├── 01_syntax.ipynb          # Module 1 content (15 sections)
 ├── 01_quiz.md               # Module 1 quiz
 ├── Module1_Assessment.ipynb # Module 1 assessment exercises
-├── 01_resources.md          # Additional resources
+├── 01_resources.md          # Module 1 additional resources (videos, books, links)
+│
+├── # Module 2: Python for Data Work
+├── 02_data.ipynb            # Module 2 content (data analysis with pandas/numpy)
+├── 02_quiz.md               # Module 2 quiz
+├── Module2_Assessment.ipynb # Module 2 assessment exercises
+├── 02_resources.md          # Module 2 additional resources (videos, books, links)
+│
 ├── google_apps_script/      # Apps Script code (reference)
+├── scripts/                 # Grading scripts
 └── _build/                  # Generated site (gitignored)
 ```
+
+### File Naming Convention
+- **`XX_syntax.ipynb` or `XX_data.ipynb`**: Main module content (teaching material)
+- **`XX_quiz.md`**: Quiz questions for the module
+- **`ModuleX_Assessment.ipynb`**: Hands-on assessment exercises
+- **`XX_resources.md`**: Additional resources (videos, books, external links)
+
+**IMPORTANT**: Module resources are in **separate files** (`01_resources.md`, `02_resources.md`), NOT embedded in the main module content files. When adding or updating resources for a module, edit the corresponding `XX_resources.md` file.
 
 ## Deployment
 - Push to GitHub → GitHub Actions builds and deploys
@@ -272,9 +290,20 @@ use_repository_button: false
 ```
 
 ## Adding New Modules
-1. Create `0X_syntax.ipynb` with content
-2. Create `0X_quiz.md` for quiz
-3. Create `ModuleX_Assessment.ipynb` for exercises
-4. Update `_toc.yml` to include new files
-5. Create `Module_X` subfolder in Google Drive
-6. Update form/script if needed for new module
+1. Create `0X_content.ipynb` with teaching content (e.g., `03_ml.ipynb`)
+2. Create `0X_quiz.md` for quiz questions
+3. Create `ModuleX_Assessment.ipynb` for hands-on exercises
+4. Create `0X_resources.md` for additional resources (videos, books, links)
+5. Update `_toc.yml` to include all new files in order:
+   ```yaml
+   - file: 03_ml
+   - file: 03_quiz
+   - file: Module3_Assessment
+   - file: 03_resources
+   ```
+6. Create `Module_X` subfolder in Google Drive for submissions
+7. Create Google Form for assessment submission
+8. Add module's response spreadsheet ID to `grade_assessments.py`
+9. Update form/script if needed for new module
+
+**Note**: Resources go in a **separate file** (`0X_resources.md`), not in the main content file.
