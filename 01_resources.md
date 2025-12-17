@@ -1,4 +1,4 @@
-# Additional Resources
+# Module 1 Additional Resources
 
 Deepen your Python knowledge with these curated resources.
 
