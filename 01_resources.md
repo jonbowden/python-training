@@ -21,29 +21,39 @@ Deepen your Python knowledge with these curated resources.
 
 ---
 
-## 🎬 Video Tutorial
+## 🎬 Video Tutorials
 
 ```{raw} html
 <div style="display: flex; align-items: center; padding: 20px; background: #f8f9fa; border-radius: 8px; margin: 15px 0; border-left: 4px solid #ff0000;">
   <div style="font-size: 48px; margin-right: 20px;">🎥</div>
   <div style="flex: 1;">
-    <h3 style="margin: 0 0 8px 0;">Python for Beginners - Full Course</h3>
-    <p style="margin: 0 0 10px 0; color: #666;">A comprehensive video tutorial covering Python basics from scratch.</p>
-    <a href="https://www.youtube.com/watch?v=fWjsdhR3z3c" target="_blank" style="display: inline-flex; align-items: center; background: #ff0000; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold;">
+    <h3 style="margin: 0 0 8px 0;">Python Tutorial for Beginners</h3>
+    <p style="margin: 0 0 10px 0; color: #666;">Comprehensive introduction to Python programming.</p>
+    <a href="https://www.youtube.com/watch?v=Gx5qb1uHss4" target="_blank" style="display: inline-flex; align-items: center; background: #ff0000; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold;">
       <span style="margin-right: 8px;">▶️</span> Watch on YouTube
     </a>
   </div>
 </div>
 
-<div style="margin-top: 20px;">
-  <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px;">
-    <iframe
-      src="https://www.youtube.com/embed/fWjsdhR3z3c"
-      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
-      frameborder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen>
-    </iframe>
+<div style="display: flex; align-items: center; padding: 20px; background: #f8f9fa; border-radius: 8px; margin: 15px 0; border-left: 4px solid #ff0000;">
+  <div style="font-size: 48px; margin-right: 20px;">🎥</div>
+  <div style="flex: 1;">
+    <h3 style="margin: 0 0 8px 0;">Python Full Course</h3>
+    <p style="margin: 0 0 10px 0; color: #666;">Complete Python course from basics to advanced.</p>
+    <a href="https://www.youtube.com/watch?v=FXKMmilL70w" target="_blank" style="display: inline-flex; align-items: center; background: #ff0000; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold;">
+      <span style="margin-right: 8px;">▶️</span> Watch on YouTube
+    </a>
+  </div>
+</div>
+
+<div style="display: flex; align-items: center; padding: 20px; background: #f8f9fa; border-radius: 8px; margin: 15px 0; border-left: 4px solid #ff0000;">
+  <div style="font-size: 48px; margin-right: 20px;">🎥</div>
+  <div style="flex: 1;">
+    <h3 style="margin: 0 0 8px 0;">Google Colab Introduction</h3>
+    <p style="margin: 0 0 10px 0; color: #666;">Getting started with Google Colab for Python.</p>
+    <a href="https://www.youtube.com/watch?v=PytsxNfR8GI" target="_blank" style="display: inline-flex; align-items: center; background: #ff0000; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold;">
+      <span style="margin-right: 8px;">▶️</span> Watch on YouTube
+    </a>
   </div>
 </div>
 ```
