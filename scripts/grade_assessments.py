@@ -520,9 +520,25 @@ def main():
     print(f"Found {len(submissions)} submission(s)")
     print()
 
+    # Group submissions by email and keep only the latest per student
+    # (submissions are already ordered by createdTime desc from list_submissions)
+    latest_by_email = {}
+    for submission in submissions:
+        file_id = submission['id']
+        filename = submission['name']
+        email = email_mapping.get(file_id) or extract_email_from_filename(filename)
+
+        if email and email not in latest_by_email:
+            latest_by_email[email] = submission
+
+    # Filter to only latest submissions
+    submissions_to_grade = list(latest_by_email.values())
+    print(f"Processing {len(submissions_to_grade)} unique student(s) (latest submission each)")
+    print()
+
     # Grade each submission
     results = []
-    for submission in submissions:
+    for submission in submissions_to_grade:
         filename = submission['name']
         file_id = submission['id']
 
