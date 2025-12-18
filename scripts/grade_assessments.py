@@ -15,6 +15,7 @@ import ast
 import json
 import os
 import re
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -35,6 +36,11 @@ DRIVE_FOLDER_ID = '1il2tcPvs2RwMmR8argOyMMimIxfO-aKe'
 RESPONSE_SPREADSHEET_IDS = {
     1: '1drrRJD40RDgcUlCweAh0ijlfircIQbzCagsoYeWqsxQ',
     2: '1RZfHeZPOJSjepquHOt1xHFBqTXvALczlIDcZzDVIWtI',
+}
+
+# Data files required for grading each module (copied to temp dir)
+MODULE_DATA_FILES = {
+    2: ['djia_data.csv', 'fx_usd_gbp.csv', 'fed_funds_rate.csv'],
 }
 SCOPES = [
     'https://www.googleapis.com/auth/drive.readonly',
@@ -374,6 +380,29 @@ def inject_into_template(code_cells: list[str], template: dict) -> dict:
     return notebook
 
 
+def copy_grading_data(module: int, target_dir: str) -> None:
+    """
+    Copy required data files for grading to the target directory.
+    This allows student code that reads from CSV files to work during grading.
+    """
+    data_files = MODULE_DATA_FILES.get(module, [])
+    if not data_files:
+        return
+
+    # Find the grading_data directory (relative to script location)
+    script_dir = Path(__file__).parent.parent
+    grading_data_dir = script_dir / 'grading_data'
+
+    for filename in data_files:
+        src = grading_data_dir / filename
+        dst = Path(target_dir) / filename
+        if src.exists():
+            shutil.copy2(src, dst)
+            print(f"  Copied {filename} to grading environment")
+        else:
+            print(f"  Warning: {filename} not found in grading_data/")
+
+
 def execute_notebook(notebook: dict, working_dir: str) -> dict:
     """Execute the notebook and return the modified notebook."""
     client = NotebookClient(
@@ -526,6 +555,9 @@ def grade_submission(drive, submission: dict, module: int, template_path: str, e
 
         # Execute in a temp directory
         with tempfile.TemporaryDirectory() as tmpdir:
+            # Copy required data files for this module (e.g., CSV files)
+            copy_grading_data(module, tmpdir)
+
             executed = execute_notebook(grading_notebook, tmpdir)
 
             # Check for result file

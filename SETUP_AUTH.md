@@ -161,6 +161,49 @@ After registering a user:
 
 ---
 
+## Automated Grading Setup
+
+The grading system uses GitHub Actions to automatically grade student notebook submissions every 30 minutes.
+
+### GitHub Token in Apps Script (CODEVISION API)
+
+The Apps Script needs a GitHub Personal Access Token to trigger grading workflows from the admin dashboard.
+
+**Location:** Google Apps Script project **"CODEVISION API"** → Project Settings (⚙️) → Script Properties
+
+| Property | Value | Purpose |
+|----------|-------|---------|
+| `GITHUB_TOKEN` | `ghp_xxxxxxxxx` | GitHub PAT with `workflow` scope to trigger Actions |
+
+**To create/update the GitHub token:**
+1. Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Generate new token with **`workflow`** scope
+3. Copy the token
+4. In Apps Script "CODEVISION API" project: ⚙️ Project Settings → Script Properties → Update `GITHUB_TOKEN`
+
+**Note:** GitHub PATs expire (default 30 days). If grading stops working with a 401 "Bad credentials" error, regenerate the token.
+
+### GitHub Repository Secrets
+
+The GitHub Actions workflow needs these secrets (Settings → Secrets and variables → Actions):
+
+| Secret | Value | Purpose |
+|--------|-------|---------|
+| `GOOGLE_SERVICE_ACCOUNT` | Full JSON content of service account key | Authenticate with Google Drive/Sheets |
+| `APPS_SCRIPT_URL` | `https://script.google.com/macros/s/.../exec` | Apps Script Web App URL |
+| `ADMIN_API_KEY` | `CodeVisionGrading2024SecretKey` | Server-to-server auth for score submission |
+
+### Service Account File
+
+The Google service account credentials are stored locally at:
+```
+codevision-grading-fde1b2c3152a.json
+```
+
+This file should NOT be committed to git (add to .gitignore). The contents are stored in GitHub Secrets as `GOOGLE_SERVICE_ACCOUNT`.
+
+---
+
 ## Security Notes
 
 - Passwords are hashed using SHA-256 before storage
