@@ -388,16 +388,24 @@ def inject_into_template(code_cells: list[str], template: dict) -> dict:
 def inject_chdir_cell(notebook: dict, target_dir: str) -> dict:
     """
     Inject a cell at the very beginning of the notebook that changes
-    the kernel's working directory to target_dir.
+    the kernel's working directory to target_dir and provides debugging info.
     This ensures pd.read_csv() can find the data files.
     """
     import copy
     nb = copy.deepcopy(notebook)
 
-    # Create a cell that changes directory
+    # Create a cell that changes directory and prints debug info
     chdir_code = f"""# === HIDDEN: SET WORKING DIRECTORY ===
 import os
-os.chdir(r'{target_dir}')
+import sys
+
+# Change to the grading directory
+target_dir = r'{target_dir}'
+print(f"DEBUG: Changing to {{target_dir}}")
+os.chdir(target_dir)
+print(f"DEBUG: Current working directory: {{os.getcwd()}}")
+print(f"DEBUG: Files in directory: {{os.listdir('.')}}")
+print(f"DEBUG: Python version: {{sys.version}}")
 """
     chdir_cell = nbformat.v4.new_code_cell(source=chdir_code)
 
@@ -596,6 +604,19 @@ def grade_submission(drive, submission: dict, module: int, template_path: str, e
             grading_notebook = inject_chdir_cell(grading_notebook, tmpdir)
 
             executed = execute_notebook(grading_notebook, tmpdir)
+
+            # Print debug output from executed cells
+            print("  DEBUG: Notebook execution output:")
+            for i, cell in enumerate(executed.get('cells', [])):
+                if cell.get('cell_type') == 'code':
+                    outputs = cell.get('outputs', [])
+                    for output in outputs:
+                        if output.get('output_type') == 'stream':
+                            text = output.get('text', '')
+                            if 'DEBUG' in text or 'Error' in text or 'error' in text.lower():
+                                print(f"    Cell {i}: {text[:500]}")
+                        elif output.get('output_type') == 'error':
+                            print(f"    Cell {i} ERROR: {output.get('ename')}: {output.get('evalue')}")
 
             # Check for result file
             result_path = os.path.join(tmpdir, 'assessment_result.json')
