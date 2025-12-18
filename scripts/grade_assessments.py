@@ -295,15 +295,36 @@ def extract_student_code(notebook: dict) -> list[str]:
     return code_cells
 
 
+def strip_ipython_magic(code: str) -> str:
+    """
+    Remove IPython magic commands (lines starting with ! or %) from code.
+    These are valid in Jupyter but not parseable by Python's AST.
+    """
+    lines = code.split('\n')
+    clean_lines = []
+    for line in lines:
+        stripped = line.lstrip()
+        # Skip IPython shell commands (!) and magic commands (%)
+        if stripped.startswith('!') or stripped.startswith('%'):
+            # Replace with a comment to preserve line numbers
+            clean_lines.append('# ' + line)
+        else:
+            clean_lines.append(line)
+    return '\n'.join(clean_lines)
+
+
 def validate_syntax(code_cells: list[str]) -> list[str]:
     """
     Validate Python syntax for all code cells.
     Returns list of error messages (empty if all valid).
+    IPython magic commands (! and %) are stripped before validation.
     """
     errors = []
     for i, code in enumerate(code_cells, start=1):
         try:
-            ast.parse(code)
+            # Strip IPython magic before parsing
+            clean_code = strip_ipython_magic(code)
+            ast.parse(clean_code)
         except SyntaxError as e:
             errors.append(f"Cell {i}, line {e.lineno}: {e.msg}")
     return errors
