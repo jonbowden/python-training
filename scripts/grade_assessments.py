@@ -405,15 +405,22 @@ def copy_grading_data(module: int, target_dir: str) -> None:
 
 def execute_notebook(notebook: dict, working_dir: str) -> dict:
     """Execute the notebook and return the modified notebook."""
-    client = NotebookClient(
-        notebook,
-        timeout=120,
-        kernel_name='python3',
-        allow_errors=True,  # Don't stop on errors - tests handle them
-        resources={'metadata': {'path': working_dir}}
-    )
+    # Save current directory and change to working_dir so kernel can find data files
+    original_dir = os.getcwd()
+    os.chdir(working_dir)
 
-    return client.execute()
+    try:
+        client = NotebookClient(
+            notebook,
+            timeout=120,
+            kernel_name='python3',
+            allow_errors=True,  # Don't stop on errors - tests handle them
+            resources={'metadata': {'path': working_dir}}
+        )
+        return client.execute()
+    finally:
+        # Restore original directory
+        os.chdir(original_dir)
 
 
 def parse_results(result_path: str) -> dict:
