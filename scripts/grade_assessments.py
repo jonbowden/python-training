@@ -380,6 +380,28 @@ def inject_into_template(code_cells: list[str], template: dict) -> dict:
     return notebook
 
 
+def inject_chdir_cell(notebook: dict, target_dir: str) -> dict:
+    """
+    Inject a cell at the very beginning of the notebook that changes
+    the kernel's working directory to target_dir.
+    This ensures pd.read_csv() can find the data files.
+    """
+    import copy
+    nb = copy.deepcopy(notebook)
+
+    # Create a cell that changes directory
+    chdir_code = f"""# === HIDDEN: SET WORKING DIRECTORY ===
+import os
+os.chdir(r'{target_dir}')
+"""
+    chdir_cell = nbformat.v4.new_code_cell(source=chdir_code)
+
+    # Insert at position 0 (very first cell)
+    nb['cells'].insert(0, chdir_cell)
+
+    return nb
+
+
 def copy_grading_data(module: int, target_dir: str) -> None:
     """
     Copy required data files for grading to the target directory.
@@ -564,6 +586,9 @@ def grade_submission(drive, submission: dict, module: int, template_path: str, e
         with tempfile.TemporaryDirectory() as tmpdir:
             # Copy required data files for this module (e.g., CSV files)
             copy_grading_data(module, tmpdir)
+
+            # Inject a cell that changes the kernel's working directory
+            grading_notebook = inject_chdir_cell(grading_notebook, tmpdir)
 
             executed = execute_notebook(grading_notebook, tmpdir)
 
