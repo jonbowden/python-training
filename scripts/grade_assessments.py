@@ -293,6 +293,11 @@ def extract_student_code(notebook: dict) -> list[str]:
             source = cell.get('source', '')
             if isinstance(source, list):
                 source = ''.join(source)
+
+            # Skip Colab-specific cells (won't work on GitHub Actions)
+            if 'google.colab' in source or 'files.upload' in source:
+                continue
+
             # Skip empty cells and cells that only have comments
             stripped = source.strip()
             if stripped and not all(line.strip().startswith('#') or not line.strip()
