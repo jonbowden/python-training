@@ -12,13 +12,10 @@
         'search.html'
     ];
 
-    // Pages that require admin access (Module 2 - pending validation)
-    // Remove pages from this list to make them available to all users
+    // Pages that require admin access
+    // Add pages here to restrict them to admins only
     const ADMIN_ONLY_PAGES = [
-        '02_data.html',
-        '02_quiz.html',
-        'Module2_Assessment.html',
-        '02_resources.html'
+        // Module 2 released to all users
     ];
 
     function getCurrentPage() {

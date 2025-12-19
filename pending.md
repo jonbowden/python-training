@@ -1,6 +1,6 @@
 # Module 2 Implementation
 
-**Status:** Complete - Admin-Only Access
+**Status:** Complete - Released to All Users
 **Created:** 2025-12-15
 **Updated:** 2025-12-15
 
@@ -149,7 +149,7 @@ Or trigger from dashboard (admin only) with module=2.
 - [x] 9. Add Apps Script trigger for file moving
 - [x] 10. Fix CORS issue with checkAdmin API (use GET instead of POST)
 - [x] 11. Deploy and test as admin
-- [ ] 12. **LAUNCH:** Remove from admin-only list when validated
+- [x] 12. **LAUNCH:** Remove from admin-only list when validated
 
 ---
 
