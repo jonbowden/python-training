@@ -917,14 +917,20 @@ function displayLeaderboard(leaderboard) {
     leaderboard.forEach(entry => {
         const row = document.createElement('tr');
 
-        // Determine rank badge class
-        let rankClass = 'rank-other';
-        if (entry.rank === 1) rankClass = 'rank-1';
-        else if (entry.rank === 2) rankClass = 'rank-2';
-        else if (entry.rank === 3) rankClass = 'rank-3';
+        // Display medals for top 3, numbers for others
+        let rankDisplay = '';
+        if (entry.rank === 1) {
+            rankDisplay = '<span style="font-size: 1.5em;">🥇</span>';
+        } else if (entry.rank === 2) {
+            rankDisplay = '<span style="font-size: 1.5em;">🥈</span>';
+        } else if (entry.rank === 3) {
+            rankDisplay = '<span style="font-size: 1.5em;">🥉</span>';
+        } else {
+            rankDisplay = `<span class="rank-badge rank-other">${entry.rank}</span>`;
+        }
 
         row.innerHTML = `
-            <td><span class="rank-badge ${rankClass}">${entry.rank}</span></td>
+            <td>${rankDisplay}</td>
             <td>${escapeHtml(entry.name)}</td>
             <td>${entry.submissions}</td>
             <td>${entry.bestScore}%</td>
