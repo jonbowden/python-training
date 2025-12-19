@@ -557,15 +557,28 @@ function renderAssessmentDetails(details) {
         `;
     }
 
-    // Show exercise scores
+    // Show exercise scores with feedback
     if (details.exercise_scores) {
         const exercises = Object.entries(details.exercise_scores);
+        const feedback = details.feedback || {};
+
         return `
             <div class="exercise-scores">
                 ${exercises.map(([name, scores]) => `
-                    <div class="exercise-score">
-                        <div class="name">${escapeHtml(name)}</div>
-                        <div class="points">${scores[0]}/${scores[1]}</div>
+                    <div class="exercise-score" style="text-align: left;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <div class="name" style="font-weight: 600;">${escapeHtml(name)}</div>
+                            <div class="points">${scores[0]}/${scores[1]}</div>
+                        </div>
+                        ${feedback[name] ? `
+                            <div class="feedback-list" style="font-size: 0.85em; line-height: 1.4;">
+                                ${feedback[name].map(fb => `
+                                    <div style="color: ${fb.startsWith('✓') ? '#059669' : '#dc2626'}; margin: 2px 0;">
+                                        ${escapeHtml(fb)}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
                     </div>
                 `).join('')}
             </div>

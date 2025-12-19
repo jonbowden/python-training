@@ -464,6 +464,7 @@ def parse_results(result_path: str) -> dict:
         data = json.load(f)
 
     scores = data.get('scores', {})
+    feedback = data.get('feedback', {})
 
     # Calculate totals
     total_score = sum(s[0] for s in scores.values())
@@ -471,6 +472,7 @@ def parse_results(result_path: str) -> dict:
 
     return {
         'scores': scores,
+        'feedback': feedback,
         'total_score': total_score,
         'max_score': max_score,
         'timestamp': data.get('timestamp')
@@ -625,7 +627,10 @@ def grade_submission(drive, submission: dict, module: int, template_path: str, e
                 result['status'] = 'graded'
                 result['score'] = results['total_score']
                 result['max_score'] = results['max_score']
-                result['details'] = {'exercise_scores': results['scores']}
+                result['details'] = {
+                    'exercise_scores': results['scores'],
+                    'feedback': results.get('feedback', {})
+                }
             else:
                 # Execution completed but no results - likely all tests failed
                 result['status'] = 'no_results'
