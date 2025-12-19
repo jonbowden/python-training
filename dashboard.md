@@ -260,6 +260,170 @@
 .admin-panel .status-msg.error {
     background: rgba(0,0,0,0.2);
 }
+/* Leaderboard Styles */
+.leaderboard-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+.leaderboard-link:hover {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+}
+.leaderboard-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+.leaderboard-modal.active {
+    display: flex;
+}
+.leaderboard-content {
+    background: white;
+    border-radius: 12px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 85vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.leaderboard-header {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.leaderboard-header h2 {
+    margin: 0;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.leaderboard-close {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+}
+.leaderboard-close:hover {
+    background: rgba(255,255,255,0.3);
+}
+.leaderboard-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.leaderboard-table th,
+.leaderboard-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+.leaderboard-table th {
+    background: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+}
+.leaderboard-table tr:hover {
+    background: #fffbeb;
+}
+.rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 0.85em;
+}
+.rank-1 { background: #fef3c7; color: #d97706; }
+.rank-2 { background: #e5e7eb; color: #4b5563; }
+.rank-3 { background: #fed7aa; color: #c2410c; }
+.rank-other { background: #f3f4f6; color: #6b7280; }
+.points-badge {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+.scoring-info {
+    margin-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 15px;
+}
+.scoring-toggle {
+    background: none;
+    border: 1px solid #e5e7eb;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.scoring-toggle:hover {
+    background: #f9fafb;
+}
+.scoring-details {
+    display: none;
+    margin-top: 15px;
+    padding: 15px;
+    background: #f9fafb;
+    border-radius: 8px;
+    font-size: 0.9em;
+    line-height: 1.6;
+}
+.scoring-details.expanded {
+    display: block;
+}
+.scoring-details h4 {
+    margin: 0 0 10px 0;
+    color: #374151;
+}
+.scoring-details ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+.scoring-details li {
+    margin: 5px 0;
+}
+.leaderboard-empty {
+    text-align: center;
+    padding: 40px;
+    color: #6b7280;
+}
 </style>
 
 <div class="dashboard-container">
@@ -330,6 +494,10 @@
             </div>
         </div>
 
+        <button class="leaderboard-link" onclick="showLeaderboard()">
+            <span>&#127942;</span> View Leaderboard
+        </button>
+
         <div class="transcript-section">
             <h3>Progress History <button class="refresh-btn" onclick="loadTranscript()">Refresh</button></h3>
             <div id="transcript-loading" class="loading">Loading your scores...</div>
@@ -349,6 +517,59 @@
                 <tbody id="transcript-body">
                 </tbody>
             </table>
+        </div>
+    </div>
+</div>
+
+<!-- Leaderboard Modal -->
+<div id="leaderboard-modal" class="leaderboard-modal" onclick="closeLeaderboardOnBackdrop(event)">
+    <div class="leaderboard-content" onclick="event.stopPropagation()">
+        <div class="leaderboard-header">
+            <h2><span>&#127942;</span> Leaderboard</h2>
+            <button class="leaderboard-close" onclick="closeLeaderboard()">&times;</button>
+        </div>
+        <div class="leaderboard-body">
+            <div id="leaderboard-loading" class="loading">Loading leaderboard...</div>
+            <div id="leaderboard-empty" class="leaderboard-empty" style="display: none;">
+                <p>No participants on the leaderboard yet.</p>
+                <p>Complete quizzes and assessments to appear here!</p>
+            </div>
+            <table id="leaderboard-table" class="leaderboard-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Activities</th>
+                        <th>Best</th>
+                        <th>Average</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                </tbody>
+            </table>
+            <div class="scoring-info">
+                <button class="scoring-toggle" onclick="toggleScoringInfo()">
+                    <span id="scoring-icon">&#9654;</span> How scoring works
+                </button>
+                <div id="scoring-details" class="scoring-details">
+                    <h4>Leaderboard Scoring (Max 100 Points)</h4>
+                    <p>Your score combines <strong>effort</strong>, <strong>quality</strong>, and <strong>consistency</strong>:</p>
+                    <ul>
+                        <li><strong>Participation (20 pts max):</strong> 2 points per activity (max 5 quizzes + 5 assessments)</li>
+                        <li><strong>Best Score (40 pts max):</strong> Your highest percentage score × 0.4</li>
+                        <li><strong>Average Score (40 pts max):</strong> Your average percentage × 0.4</li>
+                    </ul>
+                    <h4>Fair Play Rules</h4>
+                    <ul>
+                        <li>Only your <strong>best attempt</strong> per quiz/assessment counts</li>
+                        <li>Scores below <strong>30%</strong> don't count toward the leaderboard</li>
+                        <li>Separate caps: max 5 quizzes and 5 assessments count for participation</li>
+                        <li>Ties are broken by average score, then best score, then earliest participation</li>
+                    </ul>
+                    <p style="color: #6b7280; font-style: italic;">This system rewards consistent learning over gaming - focus on understanding, not just completion!</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -628,6 +849,92 @@ function updateStats(scores) {
     document.getElementById('stat-assess-avg').textContent = assessAvg + '%';
     document.getElementById('stat-assess-best').textContent = assessBest + '%';
     document.getElementById('stat-assess-passed').textContent = assessPassed;
+}
+
+// ============ LEADERBOARD ============
+
+function showLeaderboard() {
+    document.getElementById('leaderboard-modal').classList.add('active');
+    loadLeaderboard();
+}
+
+function closeLeaderboard() {
+    document.getElementById('leaderboard-modal').classList.remove('active');
+}
+
+function closeLeaderboardOnBackdrop(event) {
+    if (event.target === document.getElementById('leaderboard-modal')) {
+        closeLeaderboard();
+    }
+}
+
+function toggleScoringInfo() {
+    const details = document.getElementById('scoring-details');
+    const icon = document.getElementById('scoring-icon');
+    details.classList.toggle('expanded');
+    icon.innerHTML = details.classList.contains('expanded') ? '&#9660;' : '&#9654;';
+}
+
+async function loadLeaderboard() {
+    document.getElementById('leaderboard-loading').style.display = 'block';
+    document.getElementById('leaderboard-table').style.display = 'none';
+    document.getElementById('leaderboard-empty').style.display = 'none';
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            redirect: 'follow',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'getLeaderboard' })
+        });
+        const result = await response.json();
+
+        document.getElementById('leaderboard-loading').style.display = 'none';
+
+        if (result.success) {
+            if (result.leaderboard.length === 0) {
+                document.getElementById('leaderboard-empty').style.display = 'block';
+            } else {
+                displayLeaderboard(result.leaderboard);
+            }
+        } else {
+            document.getElementById('leaderboard-empty').innerHTML =
+                '<p>Error loading leaderboard: ' + (result.error || 'Unknown error') + '</p>';
+            document.getElementById('leaderboard-empty').style.display = 'block';
+        }
+    } catch (err) {
+        document.getElementById('leaderboard-loading').style.display = 'none';
+        document.getElementById('leaderboard-empty').innerHTML =
+            '<p>Connection error. Please try again.</p>';
+        document.getElementById('leaderboard-empty').style.display = 'block';
+    }
+}
+
+function displayLeaderboard(leaderboard) {
+    const tbody = document.getElementById('leaderboard-body');
+    tbody.innerHTML = '';
+
+    leaderboard.forEach(entry => {
+        const row = document.createElement('tr');
+
+        // Determine rank badge class
+        let rankClass = 'rank-other';
+        if (entry.rank === 1) rankClass = 'rank-1';
+        else if (entry.rank === 2) rankClass = 'rank-2';
+        else if (entry.rank === 3) rankClass = 'rank-3';
+
+        row.innerHTML = `
+            <td><span class="rank-badge ${rankClass}">${entry.rank}</span></td>
+            <td>${escapeHtml(entry.name)}</td>
+            <td>${entry.submissions}</td>
+            <td>${entry.bestScore}%</td>
+            <td>${entry.avgScore}%</td>
+            <td><span class="points-badge">${entry.totalPoints}</span></td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    document.getElementById('leaderboard-table').style.display = 'table';
 }
 
 document.addEventListener('DOMContentLoaded', () => {

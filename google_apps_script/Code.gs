@@ -68,6 +68,9 @@ function doPost(e) {
       case 'triggerGrading':
         result = triggerGrading(data.token, data.module, data.studentEmail);
         break;
+      case 'getLeaderboard':
+        result = getLeaderboard();
+        break;
       default:
         result = { success: false, error: 'Unknown action' };
     }
@@ -458,7 +461,7 @@ function triggerGrading(token, module, studentEmail) {
     });
 
     const code = response.getResponseCode();
-    if (code === 204) {
+    if (code === 204 || code === 200) {
       return { success: true, message: 'Grading workflow triggered successfully' };
     } else {
       const body = response.getContentText();
@@ -467,6 +470,173 @@ function triggerGrading(token, module, studentEmail) {
   } catch (e) {
     return { success: false, error: 'Failed to trigger workflow: ' + e.message };
   }
+}
+
+// ============ LEADERBOARD ============
+
+/**
+ * Get leaderboard data for all non-admin participants
+ * Scoring formula (max 100 points):
+ *   - Participation (20%): (min(quizzes, 5) + min(assessments, 5)) × 2
+ *   - Best Score (40%): bestPercentage × 0.4
+ *   - Average Score (40%): avgPercentage × 0.4
+ *
+ * Guard rails:
+ *   - Only best attempt per quiz/assessment counts
+ *   - Scores below 30% are excluded from calculations
+ *   - Admins are excluded from leaderboard
+ *   - Separate caps: max 5 quizzes, max 5 assessments
+ */
+function getLeaderboard() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const usersSheet = ss.getSheetByName('Users');
+  const scoresSheet = ss.getSheetByName('Scores');
+
+  if (!usersSheet) {
+    return { success: true, leaderboard: [] };
+  }
+
+  // Get all users and identify admins
+  const users = usersSheet.getDataRange().getValues();
+  const headers = users[0];
+
+  // Find admin column
+  let adminCol = -1;
+  for (let i = 0; i < headers.length; i++) {
+    if (headers[i].toString().toLowerCase().includes('admin')) {
+      adminCol = i;
+      break;
+    }
+  }
+
+  // Build user map (email -> {name, isAdmin})
+  const userMap = {};
+  for (let i = 1; i < users.length; i++) {
+    const email = users[i][0].toString().toLowerCase();
+    const name = users[i][2] || email;
+    const isAdmin = adminCol >= 0 && (users[i][adminCol] === true || users[i][adminCol] === 'TRUE' || users[i][adminCol] === 1);
+    userMap[email] = { name, isAdmin };
+  }
+
+  // Get all scores
+  if (!scoresSheet) {
+    // No scores yet - return users with zero scores
+    const leaderboard = Object.entries(userMap)
+      .filter(([email, user]) => !user.isAdmin)
+      .map(([email, user]) => ({
+        name: user.name,
+        submissions: 0,
+        bestScore: 0,
+        avgScore: 0,
+        totalPoints: 0
+      }));
+    return { success: true, leaderboard };
+  }
+
+  const allScores = scoresSheet.getDataRange().getValues();
+
+  // Group scores by user, keeping only best per quiz/assessment
+  // Structure: { email: { quizzes: {id: score}, assessments: {id: score} } }
+  const userScores = {};
+  const userFirstSubmission = {}; // For tie-breaking
+
+  for (let i = 1; i < allScores.length; i++) {
+    const email = allScores[i][0].toString().toLowerCase();
+    const activityId = allScores[i][1];
+    const percentage = Number(allScores[i][4]) || 0;
+    const timestamp = allScores[i][5];
+
+    // Skip scores below 30% threshold
+    if (percentage < 30) continue;
+
+    // Skip if user is admin or not in system
+    if (!userMap[email] || userMap[email].isAdmin) continue;
+
+    // Initialize user entry
+    if (!userScores[email]) {
+      userScores[email] = { quizzes: {}, assessments: {} };
+      userFirstSubmission[email] = timestamp;
+    }
+
+    // Track first submission for tie-breaking
+    if (timestamp && (!userFirstSubmission[email] || new Date(timestamp) < new Date(userFirstSubmission[email]))) {
+      userFirstSubmission[email] = timestamp;
+    }
+
+    // Determine if quiz or assessment based on activity ID
+    const isAssessment = activityId && activityId.includes('-assessment');
+    const category = isAssessment ? 'assessments' : 'quizzes';
+
+    // Keep only best score per activity
+    if (!userScores[email][category][activityId] || percentage > userScores[email][category][activityId]) {
+      userScores[email][category][activityId] = percentage;
+    }
+  }
+
+  // Calculate leaderboard scores
+  const leaderboard = [];
+
+  for (const [email, user] of Object.entries(userMap)) {
+    // Skip admins
+    if (user.isAdmin) continue;
+
+    const scores = userScores[email] || { quizzes: {}, assessments: {} };
+    const quizScores = Object.values(scores.quizzes);
+    const assessmentScores = Object.values(scores.assessments);
+    const allScoreValues = [...quizScores, ...assessmentScores];
+
+    // Count activities (with separate caps)
+    const quizCount = Math.min(quizScores.length, 5);
+    const assessmentCount = Math.min(assessmentScores.length, 5);
+    const cappedSubmissions = quizCount + assessmentCount;
+
+    // Calculate metrics from all scores (not capped)
+    const totalSubmissions = allScoreValues.length;
+    const bestScore = totalSubmissions > 0 ? Math.max(...allScoreValues) : 0;
+    const avgScore = totalSubmissions > 0 ? allScoreValues.reduce((a, b) => a + b, 0) / totalSubmissions : 0;
+
+    // Calculate points using the formula (with separate caps for participation)
+    const participationPoints = cappedSubmissions * 2; // Max 20 (5 quizzes + 5 assessments × 2)
+    const bestScorePoints = bestScore * 0.4; // Max 40
+    const avgScorePoints = avgScore * 0.4; // Max 40
+    const totalPoints = Math.round((participationPoints + bestScorePoints + avgScorePoints) * 10) / 10;
+
+    leaderboard.push({
+      name: user.name,
+      submissions: totalSubmissions,
+      bestScore: Math.round(bestScore),
+      avgScore: Math.round(avgScore),
+      totalPoints: totalPoints,
+      firstSubmission: userFirstSubmission[email] || null
+    });
+  }
+
+  // Sort by total points (desc), then avg score (desc), then best score (desc), then first submission (asc)
+  leaderboard.sort((a, b) => {
+    if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
+    if (b.avgScore !== a.avgScore) return b.avgScore - a.avgScore;
+    if (b.bestScore !== a.bestScore) return b.bestScore - a.bestScore;
+    // Earlier first submission wins tie
+    if (a.firstSubmission && b.firstSubmission) {
+      return new Date(a.firstSubmission) - new Date(b.firstSubmission);
+    }
+    return 0;
+  });
+
+  // Add rank (handling ties)
+  let currentRank = 1;
+  for (let i = 0; i < leaderboard.length; i++) {
+    if (i > 0 && leaderboard[i].totalPoints === leaderboard[i-1].totalPoints) {
+      leaderboard[i].rank = leaderboard[i-1].rank;
+    } else {
+      leaderboard[i].rank = currentRank;
+    }
+    currentRank++;
+    // Remove firstSubmission from output (only used for sorting)
+    delete leaderboard[i].firstSubmission;
+  }
+
+  return { success: true, leaderboard };
 }
 
 // ============ LLM GRADING ============
