@@ -1,4 +1,4 @@
-# Module 2 — Python for Data Work
+# Module 2: Python for Data Work
 
 **Duration:** 12 hours  
 **Goal:** Build confidence working with real-world datasets — loading, cleaning, transforming, analysing, and visualising data using Python.
