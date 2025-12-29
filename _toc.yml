@@ -3,11 +3,23 @@ root: intro
 chapters:
 - file: login
 - file: dashboard
-- file: 01_syntax
-- file: 01_quiz
-- file: Module1_Assessment
-- file: 01_resources
-- file: 02_data
-- file: 02_quiz
-- file: Module2_Assessment
-- file: 02_resources
+- file: Module1/Module1
+  sections:
+  - file: 01_syntax
+    title: Content
+  - file: Module1/01_quiz
+    title: Quiz
+  - file: Module1/Module1_Assessment
+    title: Assessment
+  - file: Module1/01_resources
+    title: Additional Resources
+- file: Module2/Module2
+  sections:
+  - file: 02_data
+    title: Content
+  - file: Module2/02_quiz
+    title: Quiz
+  - file: Module2/Module2_Assessment
+    title: Assessment
+  - file: Module2/02_resources
+    title: Additional Resources

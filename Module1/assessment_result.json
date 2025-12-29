@@ -1,0 +1,57 @@
+{
+  "scores": {
+    "Exercise 1": [
+      0,
+      2
+    ],
+    "Exercise 2": [
+      0,
+      4
+    ],
+    "Exercise 3": [
+      0,
+      4
+    ],
+    "Exercise 4": [
+      0,
+      4
+    ],
+    "Exercise 5": [
+      0,
+      6
+    ]
+  },
+  "feedback": {
+    "Exercise 1": [
+      "\u2717 Variable 'name' not defined",
+      "\u2717 Variable 'age' not defined",
+      "\u2717 Variable 'learning_python' not defined"
+    ],
+    "Exercise 2": [
+      "\u2717 Variable 'numbers' not defined",
+      "\u2717 Error checking list length: NameError",
+      "\u2717 Error summing list: NameError",
+      "\u2717 Error checking list contents: NameError"
+    ],
+    "Exercise 3": [
+      "\u2717 Function 'calculate_average' not defined",
+      "\u2717 Error testing [10, 20, 30]: NameError",
+      "\u2717 Error testing [5]: NameError",
+      "\u2717 Error testing []: NameError"
+    ],
+    "Exercise 4": [
+      "\u2717 Variable 'student_scores' not defined",
+      "\u2717 Error checking dictionary size: NameError",
+      "\u2717 Error checking keys: NameError",
+      "\u2717 Error checking values: NameError"
+    ],
+    "Exercise 5": [
+      "\u2717 Function 'analyse_file' not defined",
+      "\u2717 Error checking return type: NameError",
+      "\u2717 Error checking total words: NameError",
+      "\u2717 Error checking unique words: NameError",
+      "\u2717 Error checking longest word: NameError"
+    ]
+  },
+  "timestamp": "2025-12-29T15:52:52.631441"
+}
