@@ -36,6 +36,7 @@ DRIVE_FOLDER_ID = '1il2tcPvs2RwMmR8argOyMMimIxfO-aKe'
 RESPONSE_SPREADSHEET_IDS = {
     1: '1drrRJD40RDgcUlCweAh0ijlfircIQbzCagsoYeWqsxQ',
     2: '1RZfHeZPOJSjepquHOt1xHFBqTXvALczlIDcZzDVIWtI',
+    3: '17maZSZpRZM-Cscpf_a1J1vhGzA0Ly-aHyfku2CBHmZ0',
 }
 
 # Data files required for grading each module (copied to temp dir)

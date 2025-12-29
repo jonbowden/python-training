@@ -23,3 +23,13 @@ chapters:
     title: Assessment
   - file: Module2/02_resources
     title: Additional Resources
+- file: Module3/Module3
+  sections:
+  - file: Module3/03_llm_fundamentals
+    title: Content
+  - file: Module3/03_quiz
+    title: Quiz
+  - file: Module3/Module3_Assessment
+    title: Assessment
+  - file: Module3/03_resources
+    title: Additional Resources
