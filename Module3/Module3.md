@@ -31,7 +31,7 @@ All LLM access in this module goes through a **gateway abstraction** — a singl
 - **VS Code** (local development)
 
 **What you need:**
-- `LLM_BASE_URL` — provided by your instructor (an ngrok HTTPS URL)
+- `LLM_BASE_URL` — the JBChat gateway endpoint (e.g., `https://jbchat.jonbowden.com.ngrok.app`)
 - `LLM_API_KEY` — provided by your instructor (optional, depending on setup)
 
 **Students do not:**

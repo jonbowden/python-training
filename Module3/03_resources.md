@@ -5,9 +5,9 @@
 ### How This Module Works
 All LLM access in this module uses a **gateway abstraction** — a centralised HTTPS endpoint that handles authentication, rate limiting, and model routing. This mirrors enterprise practice.
 
-**You will receive from your instructor:**
-- `LLM_BASE_URL` — an ngrok HTTPS URL
-- `LLM_API_KEY` — optional authentication token
+**Default configuration:**
+- `LLM_BASE_URL` — `https://jbchat.jonbowden.com.ngrok.app` (JBChat gateway)
+- `LLM_API_KEY` — provided by your instructor (optional)
 
 ### Models Used in This Module
 - **phi3:mini** - Microsoft's compact model (mandatory)
