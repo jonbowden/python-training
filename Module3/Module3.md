@@ -22,21 +22,24 @@ You will learn how LLMs work, how to call them from Python, how they fail, and h
 
 ---
 
-### **LLM Access Options**
+### **LLM Gateway Access**
 
-You have two options for running LLM exercises:
+All LLM access in this module goes through a **gateway abstraction** — a single HTTPS endpoint that works identically from:
 
-**Option A: Local Ollama (Recommended for learning)**
-- Install [Ollama](https://ollama.com/download) on your PC
-- Pull the required model: `ollama pull phi3:mini`
-- Runs entirely on your machine - no network required
+- **Google Colab** (remote notebook)
+- **Local Jupyter** (laptop)
+- **VS Code** (local development)
 
-**Option B: Remote CodeVision LLM API**
-- Use the course-provided LLM endpoint
-- No installation required
-- Requires authentication (your course login)
+**What you need:**
+- `LLM_BASE_URL` — provided by your instructor (an ngrok HTTPS URL)
+- `LLM_API_KEY` — provided by your instructor (optional, depending on setup)
 
-Both options use the same API shape - your code works by changing one URL.
+**Students do not:**
+- Install Ollama locally
+- Generate their own tokens
+- Manage tunnelling or networking
+
+This mirrors enterprise practice where LLM access is centrally managed and secured.
 
 ---
 
@@ -50,6 +53,7 @@ Both options use the same API shape - your code works by changing one URL.
 | Structured output (JSON) | Enable automation |
 | Hallucinations | Recognise and handle failures |
 | Enterprise constraints | Audit, compliance, safety |
+| Gateway security | Prevent API misuse |
 
 ---
 
@@ -59,7 +63,7 @@ Before starting this module, ensure you have:
 
 - Completed Module 1 (Python Foundations)
 - Completed Module 2 (Python for Data Work)
-- Either Ollama installed locally OR access to the CodeVision LLM API
+- `LLM_BASE_URL` and `LLM_API_KEY` from your instructor
 
 ---
 
