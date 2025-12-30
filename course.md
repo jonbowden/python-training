@@ -32,24 +32,28 @@ Small exercises using real datasets
 Mini-project: perform data QA on a messy dataset
 Quiz: 15 questions
 
-?? Module 3: LLM Fundamentals (8 hours)
+Module 3: LLM Fundamentals (8 hours)
 
-Goal: Understand how LLMs work and how to prompt them effectively
+Goal: Understand how LLMs work and how to call them safely from Python
 
-What an LLM is (friendly NVIDIA-style walkthrough)
+What an LLM is (next-token prediction, not truth engine)
 
-Tokenization, embeddings, context windows
+Tokenization, context windows, server-side token counting
 
-Prompt engineering basics
+Calling LLMs via API gateway (HTTPS, authentication, rate limiting)
 
-Safety & hallucination handling
+Temperature, determinism, and structured output (JSON)
 
-Practical: craft prompts for summarisation, transformation, extraction
-Quiz: 10–12 questions
+Hallucinations: recognition and mitigation
+
+API Gateway Security: preventing misuse
+
+Practical: build a canonical LLM caller, validate JSON output, handle failures
+Quiz: 10-12 questions
 
 ?? Module 4: Embeddings & Vector Databases (8 hours)
 
-Goal: The first “Aha!” moment — how RAG works
+Goal: The first ï¿½Aha!ï¿½ moment ï¿½ how RAG works
 
 What are embeddings?
 
@@ -138,7 +142,7 @@ No quiz; assessed work forms part of certification
 
 1 coding problem
 
-1 short “design a solution” question
+1 short ï¿½design a solutionï¿½ question
 
 Passmark: 70%
 

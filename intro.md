@@ -46,7 +46,7 @@ By the end of this program, you will be able to:
 *Build comfort with real-world data transformations.* Master Pandas for reading, filtering, and cleaning data. Create visualisations with matplotlib.
 
 ### Module 3: LLM Fundamentals
-*Understand how LLMs work.* Learn about tokenization, embeddings, context windows, and prompt engineering. Handle safety and hallucination challenges.
+*Understand how LLMs work and how to call them safely.* Learn about tokenization, context windows, and API gateway access. Master temperature control, structured JSON output, and hallucination recognition. Understand API security for enterprise deployments.
 
 ### Module 4: Embeddings & Vector Databases
 *Your first "Aha!" moment.* Understand embeddings, cosine similarity, and FAISS. Build your first embed-store-query pipeline.

@@ -1,23 +1,26 @@
 # Module 3 Additional Resources
 
-## LLM Tools and Platforms
+## LLM Gateway Access
 
-### Ollama (Local LLM)
-- [Ollama Official Site](https://ollama.com/) - Download and install Ollama
-- [Ollama Model Library](https://ollama.com/library) - Browse available models
-- [Ollama GitHub](https://github.com/ollama/ollama) - Documentation and issues
+### How This Module Works
+All LLM access in this module uses a **gateway abstraction** — a centralised HTTPS endpoint that handles authentication, rate limiting, and model routing. This mirrors enterprise practice.
+
+**You will receive from your instructor:**
+- `LLM_BASE_URL` — an ngrok HTTPS URL
+- `LLM_API_KEY` — optional authentication token
 
 ### Models Used in This Module
-- [phi3:mini](https://ollama.com/library/phi3) - Microsoft's compact model (recommended)
-- [llama3.2:1b](https://ollama.com/library/llama3.2) - Meta's efficient small model
+- **phi3:mini** - Microsoft's compact model (mandatory)
+- **llama3.2:1b** - Meta's efficient small model (optional comparison)
 
 ---
 
 ## Official Documentation
 
 ### API References
-- [Ollama API Documentation](https://github.com/ollama/ollama/blob/main/docs/api.md) - Endpoint specifications
+- [Ollama API Documentation](https://github.com/ollama/ollama/blob/main/docs/api.md) - Endpoint specifications (we use `/api/chat`)
 - [Python Requests Library](https://requests.readthedocs.io/) - HTTP for Humans
+- [ngrok Documentation](https://ngrok.com/docs) - Secure tunnelling for HTTPS access
 
 ### Enterprise AI Concepts
 - [OpenAI Best Practices](https://platform.openai.com/docs/guides/prompt-engineering) - Prompt engineering guide

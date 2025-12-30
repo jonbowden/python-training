@@ -255,10 +255,10 @@ const mcqPool = [
     feedback: "RAG provides context from trusted sources to reduce hallucinations."
   },
   {
-    q: "What is the Ollama /api/generate endpoint used for?",
-    opts: ["User authentication", "Sending prompts and receiving LLM responses", "Database queries", "File uploads"],
+    q: "What is the Ollama /api/chat endpoint used for?",
+    opts: ["User authentication", "Sending structured message prompts and receiving LLM responses", "Database queries", "File uploads"],
     correct: 1,
-    feedback: "The /api/generate endpoint accepts prompts and returns model responses."
+    feedback: "The /api/chat endpoint accepts structured messages and returns model responses."
   },
   {
     q: "Which HTTP method is typically used to call an LLM API?",
@@ -277,6 +277,24 @@ const mcqPool = [
     opts: ["It's always faster", "Data privacy and no network dependency", "It's more accurate", "It has larger context windows"],
     correct: 1,
     feedback: "Local deployment keeps data private and works without internet."
+  },
+  {
+    q: "What is a key security measure when exposing LLM services via an API gateway?",
+    opts: ["Allowing anonymous access", "API key authentication and rate limiting", "Disabling HTTPS", "Removing all logging"],
+    correct: 1,
+    feedback: "API keys identify callers and rate limiting prevents abuse and DoS attacks."
+  },
+  {
+    q: "Why should raw LLM endpoints never be exposed publicly without protection?",
+    opts: ["They are too slow", "They can be abused for free compute, DoS, or data extraction", "They only work locally", "They require special hardware"],
+    correct: 1,
+    feedback: "Unsecured endpoints can be abused for free compute, prompt injection, or DoS attacks."
+  },
+  {
+    q: "What does the 'ngrok-skip-browser-warning' header do?",
+    opts: ["Encrypts the request", "Bypasses ngrok's free-tier interstitial page", "Increases speed", "Authenticates the user"],
+    correct: 1,
+    feedback: "This header bypasses the ngrok warning page that appears on free-tier tunnels."
   }
 ];
 
@@ -400,6 +418,18 @@ const writtenPool = [
     sample: "Apply an LLM function to DataFrame columns to generate summaries, tags, or classifications.",
     keywords: ["pandas", "dataframe", "apply", "column", "summar", "tag", "classif"],
     minMatches: 3
+  },
+  {
+    q: "What security measures should be implemented when exposing an LLM via API gateway?",
+    sample: "API key authentication, rate limiting, input validation, output filtering, logging, and monitoring for abuse.",
+    keywords: ["api", "key", "auth", "rate", "limit", "valid", "log", "monitor", "security"],
+    minMatches: 3
+  },
+  {
+    q: "Why is the /api/chat endpoint preferred over /api/generate in this module?",
+    sample: "The /api/chat endpoint uses structured messages which is consistent with modern chat APIs and works better with JSON enforcement.",
+    keywords: ["chat", "message", "structure", "json", "consistent", "modern"],
+    minMatches: 2
   }
 ];
 
