@@ -669,9 +669,9 @@ def main():
         print(f"Force re-grade: ENABLED (ignoring Graded column)")
     print()
 
-    # Find template
+    # Find template (now in Module{N}/ subfolders)
     script_dir = Path(__file__).parent.parent
-    template_path = script_dir / f"Module{module}_Assessment_TEMPLATE_WITH_HIDDEN_TESTS.ipynb"
+    template_path = script_dir / f"Module{module}" / f"Module{module}_Assessment_TEMPLATE_WITH_HIDDEN_TESTS.ipynb"
 
     if not template_path.exists():
         print(f"ERROR: Template not found: {template_path}")
