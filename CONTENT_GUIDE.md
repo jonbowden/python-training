@@ -277,7 +277,65 @@ Visit: https://github.com/jonbowden/python-training/actions
 
 ---
 
-## 9. Common Tasks Checklist
+## 9. Deploying a New Module (Complete Runbook)
+
+When deploying a new module with assessments, follow this complete checklist:
+
+### Step 1: Create Module Content
+- [ ] Create module folder: `Module{N}/`
+- [ ] Create teaching notebook: `Module{N}/{N}_topic_name.ipynb`
+- [ ] Create assessment notebook: `Module{N}/Module{N}_Assessment.ipynb`
+- [ ] Create grading template: `Module{N}/Module{N}_Assessment_TEMPLATE_WITH_HIDDEN_TESTS.ipynb`
+- [ ] Update `_toc.yml` to include new module
+
+### Step 2: Create Google Form & Spreadsheet
+- [ ] Create Google Form for assessment submission (with file upload)
+- [ ] Link form to a new response spreadsheet
+- [ ] Note the spreadsheet ID (from the URL)
+
+### Step 3: Configure Auto-Grading
+
+#### 3a. Add spreadsheet ID to grading script
+Edit `scripts/grade_assessments.py` and add the spreadsheet ID:
+```python
+RESPONSE_SPREADSHEET_IDS = {
+    1: '...',
+    2: '...',
+    N: 'YOUR_NEW_SPREADSHEET_ID',  # Add this line
+}
+```
+
+#### 3b. Share spreadsheet with service account
+1. Open the response spreadsheet in Google Sheets
+2. Click **Share** (top right)
+3. Add: `codevision-grading@codevision-grading.iam.gserviceaccount.com`
+4. Set permission to **Editor**
+5. Click **Send**
+
+#### 3c. Update GitHub Actions workflow
+Edit `.github/workflows/grade-assessments.yml` and add:
+```yaml
+      - name: Grade Module N
+        if: ${{ inputs.module == '' || inputs.module == 'N' }}
+        env:
+          GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+          APPS_SCRIPT_URL: ${{ secrets.APPS_SCRIPT_URL }}
+          ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
+        run: |
+          python scripts/grade_assessments.py \
+            --module N \
+            --student "${{ inputs.student_email }}"
+```
+
+### Step 4: Deploy
+- [ ] Commit all changes
+- [ ] Push to GitHub
+- [ ] Verify GitHub Actions workflow runs successfully
+- [ ] Test with a sample submission
+
+---
+
+## 10. Common Tasks Checklist
 
 ### Adding a New Module
 - [ ] Create content file (`XX_topic.ipynb` or `.md`)
