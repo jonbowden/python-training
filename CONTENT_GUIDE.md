@@ -279,41 +279,78 @@ Visit: https://github.com/jonbowden/python-training/actions
 
 ## 9. Deploying a New Module (Complete Runbook)
 
-When deploying a new module with assessments, follow this complete checklist:
+When deploying a new module with assessments, follow this complete checklist **in order**.
+
+---
 
 ### Step 1: Create Module Content
 - [ ] Create module folder: `Module{N}/`
-- [ ] Create teaching notebook: `Module{N}/{N}_topic_name.ipynb`
+- [ ] Create teaching notebook: `Module{N}/{NN}_topic_name.ipynb`
 - [ ] Create assessment notebook: `Module{N}/Module{N}_Assessment.ipynb`
 - [ ] Create grading template: `Module{N}/Module{N}_Assessment_TEMPLATE_WITH_HIDDEN_TESTS.ipynb`
 - [ ] Update `_toc.yml` to include new module
 
-### Step 2: Create Google Form & Spreadsheet
-- [ ] Create Google Form for assessment submission (with file upload)
-- [ ] Link form to a new response spreadsheet
-- [ ] Note the spreadsheet ID (from the URL)
+---
 
-### Step 3: Configure Auto-Grading
+### Step 2: Create Google Form for Submissions
 
-#### 3a. Add spreadsheet ID to grading script
-Edit `scripts/grade_assessments.py` and add the spreadsheet ID:
+#### 2a. Create the form
+1. Go to [Google Forms](https://forms.google.com)
+2. Create new form with:
+   - Title: "Module {N} Assessment Submission"
+   - Email collection: **ON** (Settings → Responses → Collect email addresses)
+   - File upload question for notebook (.ipynb)
+
+#### 2b. Publish the form
+1. Click **Send** button (top right)
+2. Click the **link icon** (chain link)
+3. Copy the URL - should look like:
+   ```
+   https://docs.google.com/forms/d/e/FORM_ID/viewform
+   ```
+4. **Test the link** in an incognito window to verify it works
+
+#### 2c. Update the assessment notebook with form link
+Edit `Module{N}/Module{N}_Assessment.ipynb` submission cell:
+```markdown
+Submit your completed notebook via the [Module {N} Assessment Form](https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform).
+```
+
+---
+
+### Step 3: Configure Response Spreadsheet
+
+#### 3a. Get the spreadsheet ID
+1. Open the form in edit mode
+2. Go to **Responses** tab
+3. Click the Google Sheets icon to create/link a response spreadsheet
+4. Copy the spreadsheet ID from the URL:
+   ```
+   https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit
+   ```
+
+#### 3b. Share spreadsheet with service account
+1. Open the response spreadsheet
+2. Click **Share** (top right)
+3. Add: `codevision-grading@codevision-grading.iam.gserviceaccount.com`
+4. Set permission to **Editor**
+5. Click **Send** (ignore "not a valid email" warning if shown)
+
+#### 3c. Add spreadsheet ID to grading script
+Edit `scripts/grade_assessments.py`:
 ```python
 RESPONSE_SPREADSHEET_IDS = {
     1: '...',
     2: '...',
-    N: 'YOUR_NEW_SPREADSHEET_ID',  # Add this line
+    N: 'YOUR_SPREADSHEET_ID',  # Add this line
 }
 ```
 
-#### 3b. Share spreadsheet with service account
-1. Open the response spreadsheet in Google Sheets
-2. Click **Share** (top right)
-3. Add: `codevision-grading@codevision-grading.iam.gserviceaccount.com`
-4. Set permission to **Editor**
-5. Click **Send**
+---
 
-#### 3c. Update GitHub Actions workflow
-Edit `.github/workflows/grade-assessments.yml` and add:
+### Step 4: Update GitHub Actions Workflow
+
+Edit `.github/workflows/grade-assessments.yml` and add after the last module:
 ```yaml
       - name: Grade Module N
         if: ${{ inputs.module == '' || inputs.module == 'N' }}
@@ -327,11 +364,28 @@ Edit `.github/workflows/grade-assessments.yml` and add:
             --student "${{ inputs.student_email }}"
 ```
 
-### Step 4: Deploy
+---
+
+### Step 5: Deploy and Test
+
 - [ ] Commit all changes
-- [ ] Push to GitHub
-- [ ] Verify GitHub Actions workflow runs successfully
-- [ ] Test with a sample submission
+- [ ] Push to GitHub: `git push`
+- [ ] Wait for GitHub Pages deployment (check Actions tab)
+- [ ] **Test the form link** from the live site
+- [ ] Submit a test notebook via the form
+- [ ] Manually trigger grading workflow (Actions → Grade Assessments → Run workflow)
+- [ ] Verify grading completes successfully
+
+---
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Form redirects to forms.google.com | URL has query params - use clean `/viewform` URL |
+| "Caller does not have permission" | Share spreadsheet with service account |
+| "Template not found" | Check template is in `Module{N}/` subfolder |
+| Grading returns 0 | Check mock LLM is in grading template |
 
 ---
 
