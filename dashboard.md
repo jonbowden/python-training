@@ -711,7 +711,9 @@ function displayScores(scores) {
         'module1-quiz': 'Module 1: Quiz',
         'module1-assessment': 'Module 1: Assessment',
         'module2-quiz': 'Module 2: Quiz',
-        'module2-assessment': 'Module 2: Assessment'
+        'module2-assessment': 'Module 2: Assessment',
+        'module3-quiz': 'Module 3: Quiz',
+        'module3-assessment': 'Module 3: Assessment'
     };
 
     scores.forEach((score, index) => {

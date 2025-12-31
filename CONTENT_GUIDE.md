@@ -348,7 +348,22 @@ RESPONSE_SPREADSHEET_IDS = {
 
 ---
 
-### Step 4: Update GitHub Actions Workflow
+### Step 4: Update Dashboard Display Names
+
+Edit `dashboard.md` and add the new module to the `activityNames` object (around line 710):
+```javascript
+const activityNames = {
+    'module1-quiz': 'Module 1: Quiz',
+    'module1-assessment': 'Module 1: Assessment',
+    // ... existing modules ...
+    'moduleN-quiz': 'Module N: Quiz',           // Add this
+    'moduleN-assessment': 'Module N: Assessment' // Add this
+};
+```
+
+---
+
+### Step 5: Update GitHub Actions Workflow
 
 Edit `.github/workflows/grade-assessments.yml` and add after the last module:
 ```yaml
@@ -366,7 +381,7 @@ Edit `.github/workflows/grade-assessments.yml` and add after the last module:
 
 ---
 
-### Step 5: Deploy and Test
+### Step 6: Deploy and Test
 
 - [ ] Commit all changes
 - [ ] Push to GitHub: `git push`
@@ -375,6 +390,7 @@ Edit `.github/workflows/grade-assessments.yml` and add after the last module:
 - [ ] Submit a test notebook via the form
 - [ ] Manually trigger grading workflow (Actions → Grade Assessments → Run workflow)
 - [ ] Verify grading completes successfully
+- [ ] Check transcript displays correct activity name (e.g., "Module 3: Assessment")
 
 ---
 
