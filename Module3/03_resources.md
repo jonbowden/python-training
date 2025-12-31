@@ -18,9 +18,15 @@ All LLM access in this module uses a **gateway abstraction** — a centralised H
 ## Official Documentation
 
 ### API References
-- [Ollama API Documentation](https://github.com/ollama/ollama/blob/main/docs/api.md) - Endpoint specifications (we use `/api/chat`)
 - [Python Requests Library](https://requests.readthedocs.io/) - HTTP for Humans
 - [ngrok Documentation](https://ngrok.com/docs) - Secure tunnelling for HTTPS access
+
+### JBChat Endpoints
+- `POST /chat` - Chat with RAG support (used in this module)
+- `POST /upload` - Upload files for RAG
+- `GET /files` - File management
+- `GET /search` - Search indexed content
+- `GET /health` - Health check
 
 ### Enterprise AI Concepts
 - [OpenAI Best Practices](https://platform.openai.com/docs/guides/prompt-engineering) - Prompt engineering guide

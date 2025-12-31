@@ -255,10 +255,10 @@ const mcqPool = [
     feedback: "RAG provides context from trusted sources to reduce hallucinations."
   },
   {
-    q: "What is the Ollama /api/chat endpoint used for?",
+    q: "What is the JBChat /chat endpoint used for?",
     opts: ["User authentication", "Sending structured message prompts and receiving LLM responses", "Database queries", "File uploads"],
     correct: 1,
-    feedback: "The /api/chat endpoint accepts structured messages and returns model responses."
+    feedback: "The /chat endpoint accepts structured messages and returns model responses."
   },
   {
     q: "Which HTTP method is typically used to call an LLM API?",
@@ -426,9 +426,9 @@ const writtenPool = [
     minMatches: 3
   },
   {
-    q: "Why is the /api/chat endpoint preferred over /api/generate in this module?",
-    sample: "The /api/chat endpoint uses structured messages which is consistent with modern chat APIs and works better with JSON enforcement.",
-    keywords: ["chat", "message", "structure", "json", "consistent", "modern"],
+    q: "Why is the /chat endpoint used in this module?",
+    sample: "The /chat endpoint uses structured messages which is consistent with modern chat APIs and integrates with the JBChat RAG backend.",
+    keywords: ["chat", "message", "structure", "json", "consistent", "modern", "rag"],
     minMatches: 2
   }
 ];
