@@ -22,7 +22,8 @@ All LLM access in this module uses a **gateway abstraction** — a centralised H
 - [ngrok Documentation](https://ngrok.com/docs) - Secure tunnelling for HTTPS access
 
 ### JBChat Endpoints
-- `POST /chat` - Chat with RAG support (used in this module)
+- `POST /chat/direct` - Direct LLM chat (used in this module)
+- `POST /chat` - Chat with RAG support
 - `POST /upload` - Upload files for RAG
 - `GET /files` - File management
 - `GET /search` - Search indexed content
