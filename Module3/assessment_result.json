@@ -1,0 +1,57 @@
+{
+  "scores": {
+    "Exercise 1": [
+      0,
+      4
+    ],
+    "Exercise 2": [
+      0,
+      3
+    ],
+    "Exercise 3": [
+      0,
+      4
+    ],
+    "Exercise 4": [
+      0,
+      4
+    ],
+    "Exercise 5": [
+      0,
+      5
+    ]
+  },
+  "feedback": {
+    "Exercise 1": [
+      "Function 'call_llm' not defined",
+      "Error calling function: NameError: name 'call_llm' is not defined",
+      "Error checking response: NameError",
+      "Error with temperature param: NameError"
+    ],
+    "Exercise 2": [
+      "Function 'get_response_text' not defined",
+      "Error calling function: NameError",
+      "Error checking response: NameError"
+    ],
+    "Exercise 3": [
+      "Function 'parse_json_response' not defined",
+      "Error calling function: NameError",
+      "Error checking tuple: NameError",
+      "Error in JSON test: NameError"
+    ],
+    "Exercise 4": [
+      "Function 'compare_temperatures' not defined",
+      "Error calling function: NameError",
+      "Error checking keys: NameError",
+      "Error checking types: NameError"
+    ],
+    "Exercise 5": [
+      "Function 'build_structured_prompt' not defined",
+      "Error calling function: NameError",
+      "Error checking labels: NameError",
+      "Error checking constraints: NameError",
+      "Error checking content: NameError"
+    ]
+  },
+  "timestamp": "2025-12-29T17:08:11.058287"
+}

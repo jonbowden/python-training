@@ -1,0 +1,14 @@
+Data Sources
+
+DJIA Historical
+https://www.wsj.com/market-data/quotes/index/DJIA/historical-prices?msockid=15fad59901106ca83773c0d400556d5e
+
+FX Rates
+https://www.fx-rate.net/historical/?c_input=GBP&cp_input=USD&date_to_input=1&range_input=30
+
+St Louis Fed
+https://fred.stlouisfed.org/
+
+Categories
+Money and Banking
+https://fred.stlouisfed.org/categories/32991
