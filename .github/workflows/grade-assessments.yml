@@ -61,6 +61,7 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
           APPS_SCRIPT_URL: ${{ secrets.APPS_SCRIPT_URL }}
           ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
+          SPARK_API_KEY: ${{ secrets.SPARK_API_KEY }}
         run: |
           python scripts/grade_assessments.py \
             --module 3 \
