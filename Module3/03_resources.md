@@ -42,6 +42,7 @@ All LLM access in this module uses a **gateway abstraction** — a centralised H
 - [Intro to Large Language Models](https://www.youtube.com/watch?v=zjkBMFhNj_g) - Andrej Karpathy
 
 ### Ollama Setup
+- **[Running Ollama Locally and Accessing It from Google Colab via Pinggy](../videos/ollama-pinggy-setup.mp4)** - CodeVision tutorial showing how to set up Ollama on your laptop and expose it via Pinggy tunnel for use in Colab notebooks
 - [Run LLMs Locally with Ollama](https://www.youtube.com/watch?v=k_1pOF1mj8k) - Getting started guide
 - [Ollama Tutorial](https://www.youtube.com/watch?v=90ozfdsQOKo) - Comprehensive walkthrough
 
