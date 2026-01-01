@@ -8,13 +8,39 @@ This guide explains how to add and modify content in your Jupyter Book training 
 
 ```
 codevision_poc/
-├── _config.yml          # Book configuration
-├── _toc.yml             # Table of contents (defines structure)
-├── intro.md             # Landing page
-├── 01_syntax.ipynb      # Section 1 content (notebook)
-├── 01_quiz.md           # Section 1 quiz
-├── CV_White.png         # Logo
-└── .github/workflows/   # Auto-deployment
+├── _config.yml              # Book configuration
+├── _toc.yml                 # Table of contents (defines structure)
+├── intro.md                 # Landing page
+├── login.md                 # Login page
+├── dashboard.md             # Student dashboard
+├── Module1/                 # Module 1 folder
+│   ├── Module1.md           # Module overview page
+│   ├── 01_quiz.md           # Quiz
+│   ├── 01_resources.md      # Additional resources
+│   ├── Module1_Assessment.ipynb                    # Student assessment
+│   └── Module1_Assessment_TEMPLATE_WITH_HIDDEN_TESTS.ipynb  # Grading template
+├── Module2/                 # Module 2 folder
+│   ├── Module2.md
+│   ├── 02_quiz.md
+│   ├── 02_resources.md
+│   ├── Module2_Assessment.ipynb
+│   └── Module2_Assessment_TEMPLATE_WITH_HIDDEN_TESTS.ipynb
+├── Module3/                 # Module 3 folder (LLM module)
+│   ├── Module3.md
+│   ├── 03_llm_fundamentals.ipynb   # Content notebook
+│   ├── 03_quiz.md
+│   ├── 03_resources.md
+│   ├── Module3_Assessment.ipynb
+│   └── Module3_Assessment_TEMPLATE_WITH_HIDDEN_TESTS.ipynb
+├── 01_syntax.ipynb          # Module 1 content (legacy location)
+├── 02_data.ipynb            # Module 2 content (legacy location)
+├── scripts/                 # Grading scripts
+│   ├── grade_assessments.py
+│   └── requirements-grading.txt
+├── .github/workflows/       # GitHub Actions
+│   ├── deploy.yml           # Build and deploy site
+│   └── grade-assessments.yml # Automated grading
+└── CV_White.png             # Logo
 ```
 
 ---
@@ -284,11 +310,31 @@ When deploying a new module with assessments, follow this complete checklist **i
 ---
 
 ### Step 1: Create Module Content
+
+#### 1a. Create folder and files
 - [ ] Create module folder: `Module{N}/`
-- [ ] Create teaching notebook: `Module{N}/{NN}_topic_name.ipynb`
-- [ ] Create assessment notebook: `Module{N}/Module{N}_Assessment.ipynb`
+- [ ] Create module overview: `Module{N}/Module{N}.md`
+- [ ] Create content notebook: `Module{N}/{NN}_topic_name.ipynb`
+  - **Important:** Content heading should be `# Content` (not the module name)
+- [ ] Create quiz: `Module{N}/{NN}_quiz.md`
+- [ ] Create resources page: `Module{N}/{NN}_resources.md`
+- [ ] Create student assessment: `Module{N}/Module{N}_Assessment.ipynb`
 - [ ] Create grading template: `Module{N}/Module{N}_Assessment_TEMPLATE_WITH_HIDDEN_TESTS.ipynb`
-- [ ] Update `_toc.yml` to include new module
+
+#### 1b. Update `_toc.yml`
+
+```yaml
+- file: Module{N}/Module{N}
+  sections:
+  - file: Module{N}/{NN}_topic_name
+    title: Content
+  - file: Module{N}/{NN}_quiz
+    title: Quiz
+  - file: Module{N}/Module{N}_Assessment
+    title: Assessment
+  - file: Module{N}/{NN}_resources
+    title: Additional Resources
+```
 
 ---
 
@@ -348,7 +394,46 @@ RESPONSE_SPREADSHEET_IDS = {
 
 ---
 
-### Step 4: Update Dashboard Display Names
+### Step 4: Create Grading Template
+
+The grading template (`Module{N}_Assessment_TEMPLATE_WITH_HIDDEN_TESTS.ipynb`) contains:
+1. Hidden scoring setup cells
+2. Environment configuration (mock LLM or real LLM)
+3. Hidden test cells for each exercise
+4. Results output cell
+
+#### 4a. Standard module (no LLM required)
+
+Use mock responses or static tests. See Module 1 or 2 templates for examples.
+
+#### 4b. LLM module (requires Spark API)
+
+For modules that test LLM functionality, the grading template needs:
+
+1. **Environment config cell** with Spark LLM setup:
+```python
+# === GRADING ENVIRONMENT CONFIG ===
+import os
+import requests
+
+SPARK_BASE_URL = os.environ.get('SPARK_BASE_URL', 'https://jbchat.jonbowden.com.ngrok.app')
+SPARK_API_KEY = os.environ.get('SPARK_API_KEY')  # Set in GitHub Actions secrets
+LLM_BASE_URL = SPARK_BASE_URL
+LLM_API_KEY = SPARK_API_KEY  # Pass to student code so it uses /chat/direct
+
+# Check Spark availability, fall back to mock if unavailable
+```
+
+2. **Mock LLM fallback** for when Spark is unavailable (local testing)
+
+3. **Debug output** using `DEBUG:` prefix so it appears in logs:
+```python
+print(f"DEBUG: GRADING_MODE={_grading_mode.upper()}, SPARK_URL={SPARK_BASE_URL}")
+```
+
+---
+
+### Step 5: Update Dashboard Display Names
 
 Edit `dashboard.md` and add the new module to the `activityNames` object (around line 710):
 ```javascript
@@ -363,9 +448,11 @@ const activityNames = {
 
 ---
 
-### Step 5: Update GitHub Actions Workflow
+### Step 6: Update GitHub Actions Workflow
 
 Edit `.github/workflows/grade-assessments.yml` and add after the last module:
+
+#### Standard module:
 ```yaml
       - name: Grade Module N
         if: ${{ inputs.module == '' || inputs.module == 'N' }}
@@ -379,9 +466,33 @@ Edit `.github/workflows/grade-assessments.yml` and add after the last module:
             --student "${{ inputs.student_email }}"
 ```
 
+#### LLM module (requires SPARK_API_KEY):
+```yaml
+      - name: Grade Module N
+        if: ${{ inputs.module == '' || inputs.module == 'N' }}
+        env:
+          GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+          APPS_SCRIPT_URL: ${{ secrets.APPS_SCRIPT_URL }}
+          ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
+          SPARK_API_KEY: ${{ secrets.SPARK_API_KEY }}
+        run: |
+          python scripts/grade_assessments.py \
+            --module N \
+            --student "${{ inputs.student_email }}"
+```
+
 ---
 
-### Step 6: Deploy and Test
+### Step 7: Configure GitHub Secrets (if needed)
+
+For LLM modules, ensure `SPARK_API_KEY` secret exists:
+
+1. Go to repository **Settings → Secrets and variables → Actions**
+2. Add secret: `SPARK_API_KEY` with the API key value
+
+---
+
+### Step 8: Deploy and Test
 
 - [ ] Commit all changes
 - [ ] Push to GitHub: `git push`
@@ -389,6 +500,7 @@ Edit `.github/workflows/grade-assessments.yml` and add after the last module:
 - [ ] **Test the form link** from the live site
 - [ ] Submit a test notebook via the form
 - [ ] Manually trigger grading workflow (Actions → Grade Assessments → Run workflow)
+- [ ] Check logs for `GRADING_MODE=SPARK` (LLM modules) or successful execution
 - [ ] Verify grading completes successfully
 - [ ] Check transcript displays correct activity name (e.g., "Module 3: Assessment")
 
@@ -401,17 +513,24 @@ Edit `.github/workflows/grade-assessments.yml` and add after the last module:
 | Form redirects to forms.google.com | URL has query params - use clean `/viewform` URL |
 | "Caller does not have permission" | Share spreadsheet with service account |
 | "Template not found" | Check template is in `Module{N}/` subfolder |
-| Grading returns 0 | Check mock LLM is in grading template |
+| Grading returns 0 (standard module) | Check mock responses in grading template |
+| Grading returns 0 (LLM module) | Check `GRADING_MODE` in logs - should be `SPARK` not `MOCK` |
+| `GRADING_MODE=MOCK` when it should be `SPARK` | Check `SPARK_API_KEY` secret is set and passed in workflow |
+| HTTPError in student code | Ensure `LLM_API_KEY = SPARK_API_KEY` in template (not `None`) |
+| Grading mode not visible in logs | Use `DEBUG:` prefix in print statements |
 
 ---
 
 ## 10. Common Tasks Checklist
 
 ### Adding a New Module
-- [ ] Create content file (`XX_topic.ipynb` or `.md`)
-- [ ] Create quiz file (`XX_quiz.md`)
-- [ ] Update `_toc.yml`
+- [ ] Create module folder and all required files
+- [ ] Content notebook heading should be `# Content`
+- [ ] Create Google Form and link spreadsheet
+- [ ] Update `_toc.yml`, dashboard, and workflow
+- [ ] For LLM modules: configure Spark API in template and add secret
 - [ ] Commit and push
+- [ ] Test grading workflow
 
 ### Adding Questions to Existing Quiz
 - [ ] Edit the quiz `.md` file
@@ -419,9 +538,18 @@ Edit `.github/workflows/grade-assessments.yml` and add after the last module:
 - [ ] Commit and push
 
 ### Adding Media
-- [ ] Add file to project folder (or use external URL)
-- [ ] Reference in markdown
+- [ ] Upload to YouTube (recommended) or add to project folder
+- [ ] Add link to resources page (`{NN}_resources.md`)
+- [ ] Optionally add link in content notebook
 - [ ] Commit and push
+
+### Adding a Video Tutorial
+1. Upload to YouTube
+2. Add to resources page:
+   ```markdown
+   - **[Video Title](https://youtu.be/VIDEO_ID)** - Description
+   ```
+3. Optionally embed in content with link or `YouTubeVideo()` cell
 
 ---
 
