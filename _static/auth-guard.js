@@ -15,12 +15,7 @@
     // Pages that require admin access
     // Add pages here to restrict them to admins only
     const ADMIN_ONLY_PAGES = [
-        // Module 3 - admin only during testing
-        'Module3.html',
-        '03_llm_fundamentals.html',
-        '03_quiz.html',
-        'Module3_Assessment.html',
-        '03_resources.html'
+        // All modules released - no restrictions
     ];
 
     function getCurrentPage() {
@@ -79,7 +74,7 @@
         document.body.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center; padding: 20px;">
                 <h1 style="font-size: 3rem; margin-bottom: 1rem;">Coming Soon</h1>
-                <p style="font-size: 1.25rem; max-width: 500px; opacity: 0.9;">Module 2: Python for Data Work is currently being prepared. Check back soon!</p>
+                <p style="font-size: 1.25rem; max-width: 500px; opacity: 0.9;">This content is currently being prepared. Check back soon!</p>
                 <a href="dashboard.html" style="margin-top: 2rem; padding: 12px 24px; background: white; color: #667eea; text-decoration: none; border-radius: 8px; font-weight: 600; transition: transform 0.2s;">Return to Dashboard</a>
             </div>
         `;
