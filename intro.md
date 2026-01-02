@@ -7,47 +7,55 @@
     margin: 20px 0 30px 0;
 }
 .announcement-box {
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-    color: white;
-    padding: 20px;
-    border-radius: 10px;
+    background: #f8fafc;
+    border-left: 4px solid #2563eb;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
     margin-bottom: 15px;
     display: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
 .announcement-box.visible {
     display: block;
 }
 .announcement-box h4 {
-    margin: 0 0 10px 0;
-    color: white;
+    margin: 0 0 8px 0;
+    color: #1e40af;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    font-size: 0.9em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 .announcement-box .announcement-content {
-    line-height: 1.6;
+    line-height: 1.7;
+    color: #334155;
+    font-size: 1em;
 }
 .announcement-box .announcement-meta {
     margin-top: 12px;
-    font-size: 0.85em;
-    opacity: 0.8;
+    font-size: 0.8em;
+    color: #64748b;
 }
 .announcement-box .no-announcement {
-    opacity: 0.7;
+    color: #64748b;
     font-style: italic;
 }
 .view-history-btn {
-    background: rgba(255,255,255,0.2);
-    border: 1px solid rgba(255,255,255,0.4);
-    color: white;
-    padding: 6px 14px;
-    border-radius: 5px;
+    background: #e2e8f0;
+    border: none;
+    color: #475569;
+    padding: 6px 12px;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 13px;
-    margin-top: 10px;
+    font-size: 12px;
+    margin-top: 12px;
+    transition: background 0.2s;
 }
 .view-history-btn:hover {
-    background: rgba(255,255,255,0.3);
+    background: #cbd5e1;
 }
 
 /* Admin Announcement Panel */
