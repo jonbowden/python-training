@@ -25,13 +25,19 @@ codevision_poc/
 │   ├── 02_resources.md
 │   ├── Module2_Assessment.ipynb
 │   └── Module2_Assessment_TEMPLATE_WITH_HIDDEN_TESTS.ipynb
-├── Module3/                 # Module 3 folder (LLM module)
+├── Module3/                 # Module 3 folder (LLM Fundamentals)
 │   ├── Module3.md
 │   ├── 03_llm_fundamentals.ipynb   # Content notebook
 │   ├── 03_quiz.md
 │   ├── 03_resources.md
 │   ├── Module3_Assessment.ipynb
 │   └── Module3_Assessment_TEMPLATE_WITH_HIDDEN_TESTS.ipynb
+├── Module4/                 # Module 4 folder (ML & Deep Learning)
+│   ├── Module4.md
+│   ├── 04_ml_dl_foundations.ipynb
+│   ├── 04_quiz.md
+│   ├── 04_resources.md
+│   └── Module4_Assessment.ipynb
 ├── 01_syntax.ipynb          # Module 1 content (legacy location)
 ├── 02_data.ipynb            # Module 2 content (legacy location)
 ├── scripts/                 # Grading scripts
@@ -550,6 +556,59 @@ For LLM modules, ensure `SPARK_API_KEY` secret exists:
    - **[Video Title](https://youtu.be/VIDEO_ID)** - Description
    ```
 3. Optionally embed in content with link or `YouTubeVideo()` cell
+
+---
+
+## 11. Managing Announcements
+
+The home page includes an announcements system for communicating with students. Only admins can post and delete announcements.
+
+### How It Works
+
+- **Current announcement** displays at the top of the home page for all users
+- **Loading state** shows a spinner while fetching announcements
+- **No announcements** = nothing displayed (clean home page)
+- **History** is maintained and viewable via "View History" button
+
+### Posting an Announcement (Admin Only)
+
+1. Log in as an admin
+2. Go to the home page (intro.html)
+3. The red/purple "Post Announcement" panel appears at the top
+4. Enter your announcement text
+5. Click **Post Announcement**
+
+The new announcement immediately becomes the current announcement visible to all users.
+
+### Deleting an Announcement (Admin Only)
+
+**Delete current announcement:**
+1. Click **Delete Current** button in the admin panel
+
+**Delete from history:**
+1. Click **View History** button
+2. Click **Delete** next to any announcement
+
+### Backend Configuration
+
+Announcements are stored in a Google Sheet:
+- **Spreadsheet ID:** `1QS95oy5sZWRMfavFytoGNvgm4ICp60q3iDtx192P8Q0`
+- **Sheet name:** `Announcements`
+- **Columns:** `id | content | author | authorEmail | timestamp`
+
+The Google Apps Script handles these actions:
+- `getAnnouncements` — Returns current announcement and history (public)
+- `postAnnouncement` — Creates new announcement (admin only)
+- `deleteAnnouncement` — Removes announcement by ID (admin only)
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| "Loading announcements..." stuck | Check browser console for API errors |
+| "Admin access required" error | Verify you're logged in as admin |
+| Announcement not appearing | Wait for page to fully load; check API response |
+| Can't see admin panel | Log in with an admin account |
 
 ---
 
