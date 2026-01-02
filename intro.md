@@ -379,7 +379,9 @@ async function postAnnouncement() {
             body: JSON.stringify({
                 action: 'postAnnouncement',
                 token: auth.token,
-                content: text
+                content: text,
+                authorName: auth.user.name,
+                authorEmail: auth.user.email
             })
         });
         const result = await response.json();
