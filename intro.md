@@ -229,9 +229,35 @@
     padding: 40px;
     color: #6b7280;
 }
+/* Loading state */
+.announcement-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #64748b;
+    font-size: 0.9em;
+    padding: 12px 0;
+}
+.announcement-loading .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #e2e8f0;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
 </style>
 
 <div class="announcement-container">
+    <!-- Loading State -->
+    <div id="announcement-loading" class="announcement-loading">
+        <div class="spinner"></div>
+        <span>Loading announcements...</span>
+    </div>
+
     <!-- Current Announcement Display -->
     <div id="announcement-box" class="announcement-box">
         <h4><span>&#128227;</span> Announcement</h4>
@@ -306,6 +332,9 @@ async function checkAnnouncementAdminStatus() {
 }
 
 async function loadAnnouncements() {
+    const loadingEl = document.getElementById('announcement-loading');
+    const box = document.getElementById('announcement-box');
+
     try {
         const response = await fetch(ANNOUNCEMENT_API_URL, {
             method: 'POST',
@@ -315,16 +344,19 @@ async function loadAnnouncements() {
         });
         const result = await response.json();
 
+        // Hide loading spinner
+        loadingEl.style.display = 'none';
+
         if (result.success && result.current) {
             displayCurrentAnnouncement(result.current);
         } else {
-            // No current announcement - hide the box for non-admins
-            if (!isAdmin) {
-                document.getElementById('announcement-box').classList.remove('visible');
-            }
+            // No current announcement - hide completely (unless admin)
+            box.classList.remove('visible');
         }
     } catch (err) {
         console.error('Failed to load announcements:', err);
+        // Hide loading on error too
+        loadingEl.style.display = 'none';
     }
 }
 
@@ -520,7 +552,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (isAdmin) {
         document.getElementById('admin-announcement-panel').classList.add('visible');
-        document.getElementById('announcement-box').classList.add('visible');
+        // Hide loading for admins - they'll see the admin panel
+        document.getElementById('announcement-loading').style.display = 'none';
     }
 
     // Load current announcements
