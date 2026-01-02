@@ -68,9 +68,9 @@ All LLM access in this module uses a **gateway abstraction** — a centralised H
 
 ---
 
-## Preparing for Module 4 (RAG)
+## Preparing for Module 5 (RAG)
 
-Module 4 will cover Retrieval-Augmented Generation (RAG). To prepare:
+Module 5 will cover Retrieval-Augmented Generation (RAG). To prepare:
 
 1. **Understand embeddings** - How text is converted to vectors
 2. **Learn about vector databases** - FAISS, Chroma, Pinecone
