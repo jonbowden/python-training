@@ -1,5 +1,9 @@
 # Module 4 Additional Resources — ML & DL Foundations
 
+## Companion Resources (from this module)
+- [Hiker's Cheat Sheet](Module4_Hiker_CheatSheet.md) — Rosetta Stone mapping the analogy terms to technical ML/DL terms
+- [Knowledge Checks](Module4_Knowledge_Checks.md) — 5 questions to confirm your understanding (answer in plain English)
+
 ## Conceptual Foundations
 - Michael Nielsen — *Neural Networks and Deep Learning* (Chapters 1–2)
 - Andrew Ng — ML course (focus: loss, overfitting, bias/variance)
