@@ -33,3 +33,13 @@ chapters:
     title: Assessment
   - file: Module3/03_resources
     title: Additional Resources
+- file: Module4/Module4
+  sections:
+  - file: Module4/04_ml_dl_foundations
+    title: Content
+  - file: Module4/04_quiz
+    title: Quiz
+  - file: Module4/Module4_Assessment
+    title: Assessment
+  - file: Module4/04_resources
+    title: Additional Resources

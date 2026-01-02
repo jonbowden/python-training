@@ -15,7 +15,12 @@
     // Pages that require admin access
     // Add pages here to restrict them to admins only
     const ADMIN_ONLY_PAGES = [
-        // All modules released - no restrictions
+        // Module 4 - Admin only during testing
+        'Module4.html',
+        '04_ml_dl_foundations.html',
+        '04_quiz.html',
+        'Module4_Assessment.html',
+        '04_resources.html'
     ];
 
     function getCurrentPage() {
