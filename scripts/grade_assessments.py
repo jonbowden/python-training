@@ -343,6 +343,30 @@ def validate_syntax(code_cells: list[str]) -> list[str]:
     return errors
 
 
+def filter_valid_cells(code_cells: list[str]) -> tuple[list[str], list[str]]:
+    """
+    Filter code cells, keeping only those with valid syntax.
+    Returns tuple of (valid_cells, error_messages).
+
+    GRADING POLICY: Cells with syntax errors are skipped so they don't fail
+    the entire assessment. Students receive credit for exercises that work,
+    even if other cells have errors. This applies to ALL modules.
+
+    Only if ALL cells have syntax errors will the submission receive 0 marks.
+    """
+    valid_cells = []
+    errors = []
+    for i, code in enumerate(code_cells, start=1):
+        try:
+            # Strip IPython magic before parsing
+            clean_code = strip_ipython_magic(code)
+            ast.parse(clean_code)
+            valid_cells.append(code)
+        except SyntaxError as e:
+            errors.append(f"Cell {i}, line {e.lineno}: {e.msg}")
+    return valid_cells, errors
+
+
 def load_template(template_path: str) -> dict:
     """Load the grading template notebook."""
     with open(template_path, 'r', encoding='utf-8') as f:
@@ -535,7 +559,15 @@ def submit_score(email: str, module_id: str, score: int, max_score: int, details
 
 
 def grade_submission(drive, submission: dict, module: int, template_path: str, email_mapping: dict, force: bool = False) -> dict:
-    """Grade a single submission and return results."""
+    """
+    Grade a single submission and return results.
+
+    This function applies consistent grading behavior across ALL modules:
+    - Cells with syntax errors are SKIPPED (not executed)
+    - Valid cells are still graded normally
+    - Students receive partial credit for exercises that work
+    - Only if ALL cells have syntax errors does the submission get 0
+    """
     filename = submission['name']
     file_id = submission['id']
     module_id = f"module{module}-assessment"
@@ -585,19 +617,27 @@ def grade_submission(drive, submission: dict, module: int, template_path: str, e
         submit_score(email, module_id, 0, 20, result['details'])
         return result
 
-    # AST SYNTAX VALIDATION GATE
-    syntax_errors = validate_syntax(code_cells)
+    # Filter out cells with syntax errors (instead of failing the whole assessment)
+    valid_cells, syntax_errors = filter_valid_cells(code_cells)
+
     if syntax_errors:
+        print(f"  Note: Skipping {len(syntax_errors)} cell(s) with syntax errors:")
+        for err in syntax_errors[:3]:
+            print(f"    - {err}")
+
+    if not valid_cells:
+        # ALL cells have syntax errors - nothing to grade
         result['status'] = 'syntax_error'
         result['score'] = 0
         result['details'] = {'syntax_errors': syntax_errors}
         submit_score(email, module_id, 0, 20, result['details'])
         return result
 
-    # Syntax OK - proceed with grading
+    # Proceed with grading using only valid cells
+    # (syntax_errors will be included in feedback if any cells were skipped)
     try:
         template = load_template(template_path)
-        grading_notebook = inject_into_template(code_cells, template)
+        grading_notebook = inject_into_template(valid_cells, template)
 
         # Execute in a temp directory
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -633,11 +673,16 @@ def grade_submission(drive, submission: dict, module: int, template_path: str, e
                     'exercise_scores': results['scores'],
                     'feedback': results.get('feedback', {})
                 }
+                # Include info about skipped cells with syntax errors
+                if syntax_errors:
+                    result['details']['skipped_cells'] = syntax_errors
             else:
                 # Execution completed but no results - likely all tests failed
                 result['status'] = 'no_results'
                 result['score'] = 0
                 result['details'] = {'error': 'No assessment_result.json generated'}
+                if syntax_errors:
+                    result['details']['skipped_cells'] = syntax_errors
 
         # Submit score
         submit_score(email, module_id, result['score'], result['max_score'], result['details'])
